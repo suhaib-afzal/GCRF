@@ -17,7 +17,9 @@ This module implements the class :class:`EEGSignalGenerator <EEGSignalGenerator>
 | 29-May-2020 | FOE    | - Class :class:`EEGSignalGenerator` created but      |
 |             |        |   unfinished.                                        |
 +-------------+--------+------------------------------------------------------+
-
+| 27-Jun-2020 | JJR    | - Class :class:`EEGSignalGenerator`                  |
+|             |        |   adding some changes.                               |
++-------------+--------+------------------------------------------------------+
 
 
 .. sectionauthor:: Felipe Orihuela-Espina <f.orihuela-espina@inaoep.mx>
