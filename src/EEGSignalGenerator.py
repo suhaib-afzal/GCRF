@@ -74,8 +74,7 @@ class EEGSignalGenerator:
 		self.__frequency_bands['beta']  = [13,30]
 		self.__frequency_bands['gamma'] = [30,40]
 		self.__samplingRate = 512 #[Hz]
-		
-		
+
 		#Check parameters
 		if type(nSamples) is not int:
 			msg = self.getClassName() + ':__init__: Unexpected parameter type for parameter ''nSamples''.'
@@ -116,10 +115,12 @@ class EEGSignalGenerator:
 		:setter: Sets the data.
 		:type: int
 		'''
+
 		return copy.deepcopy(self.__data)
 
 	@data.setter
 	def data(self,newData): #data setter
+
 		if type(newData) is not np.ndarray:
 			msg = self.getClassName() + ':data: Unexpected attribute type.'
 			raise ValueError(msg)
@@ -139,13 +140,14 @@ class EEGSignalGenerator:
 	@property
 	def frequency_bands(self): #frequency_bands getter
 		'''
-		The eeg frequency bands.
+		The EEG frequency bands.
 		
 		This is a read-only property
 		
-		:getter: Gets the eeg frequency bands
+		:getter: Gets the EEG frequency bands
 		:type: dict
 		'''
+
 		return copy.deepcopy(self.__frequency_bands)
 
 
@@ -169,10 +171,12 @@ class EEGSignalGenerator:
 		:setter: Sets the number of channels.
 		:type: int
 		'''
+
 		return self.__data.shape[1]
 
 	@nChannels.setter
 	def nChannels(self,newNChannels): #nChannels setter
+
 		if type(newNChannels) is not int:
 			msg = self.getClassName() + ':nChannels: Unexpected attribute type.'
 			raise ValueError(msg)
@@ -189,7 +193,9 @@ class EEGSignalGenerator:
 			msg = self.getClassName() + ':nChannels: New number of channels is smaller than current number of channels. Some data will be lost.'
 			warnings.warn(msg,RuntimeWarning)
 			self.data = copy.deepcopy(self.data[:,0:newNChannels,:])
+
 		return None
+
 
 	@property
 	def nSamples(self): #nSamples getter
@@ -210,15 +216,17 @@ class EEGSignalGenerator:
 		:setter: Sets the number of temporal samples.
 		:type: int
 		'''
+
 		return self.__data.shape[0]
 
 	@nSamples.setter
 	def nSamples(self,newNSamples): #nSamples setter
+
 		if type(newNSamples) is not int:
 			msg = self.getClassName() + ':nSamples: Unexpected attribute type.'
 			raise ValueError(msg)
 		if newNSamples < 0:
-			msg = self.getClassName() + ':nChannels: Unexpected attribute value. Number of temporal samples must be greater or equal than 0.'
+			msg = self.getClassName() + ':nSamples: Unexpected attribute value. Number of temporal samples must be greater or equal than 0.'
 			raise ValueError(msg)
 		
 		if newNSamples > self.nSamples:
@@ -230,6 +238,7 @@ class EEGSignalGenerator:
 			msg = self.getClassName() + ':nSamples: New number of temporal samples is smaller than current number of temporal samples. Some data will be lost.'
 			warnings.warn(msg,RuntimeWarning)
 			self.data = copy.deepcopy(self.data[0:newNSamples,:,:])
+
 		return None
 
 
@@ -242,10 +251,12 @@ class EEGSignalGenerator:
 		:setter: Sets the sampling rate.
 		:type: float
 		'''
+
 		return self.__samplingRate
 
 	@samplingRate.setter
 	def samplingRate(self,newSamplingRate): #samplingrate setter
+
 		if type(newSamplingRate) is int:
 			newSamplingRate = float(newSamplingRate)
 		if type(newSamplingRate) is not float:
@@ -265,17 +276,22 @@ class EEGSignalGenerator:
 	
 	#Protected methods
 	
+
 	#Public methods
+
 	def getClassName(self):
 		'''Gets the class name.
 		
 		:return: The class name
 		:rtype: str
 		'''
+
 		return type(self).__name__
 
+
 	def addFrequencyBand(self,channelsList = list(), initSample = 0, endSample = -1, \
-						  freqBand = 'alpha', amplitudeScalingFactor = 1):
+						  freqBand = 'alpha', amplitudeScalingFactor = 1, \
+						  frequencyResolutionStep = 0.1):
 		'''
 		Adds a frequency band to the data tensor.
 		
@@ -305,7 +321,11 @@ class EEGSignalGenerator:
 			scaling amplitudes to [0 amplitudeScalingFactor].
 			Optional. Default is 1.
 		:type amplitudeScalingFactor: float (positive)
-		
+		:param frequencyResolutionStep: The step for generating evenly spaced values
+			within the interval of frequencies of the band to be simulated.
+			Optional. Default is 0.1.
+		:type frequencyResolutionStep: float (positive)
+
 		:return: None
 		:rtype: NoneType
 		
@@ -316,6 +336,7 @@ class EEGSignalGenerator:
 		.. seealso:: generateFrequencyBand
 		
 		'''
+
 		if type(channelsList) is not list:
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter type for parameter ''channelList''.'
 			raise ValueError(msg)
@@ -343,54 +364,27 @@ class EEGSignalGenerator:
 		if endSample <= initSample: #Ensure the endSample is posterior to the initSample
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter value for parameter ''endSample''.'
 			raise ValueError(msg)
-		#No need to type check freqBand and amplitudeScalingFactor as these
+		#No need to type check freqBand, amplitudeScalingFactor and frequencyResolutionStep as these
 		#are passed to method generateFrequencyBand.
 
 		channelsList = list(set(channelsList)) #Unique and sort elements
 		nChannels = len(channelsList)
+		#nSamples  = endSample - initSample + 1
 		nSamples  = endSample - initSample
 		tmpData = self.generateFrequencyBand(freqBand = freqBand, \
 										nSamples = nSamples, \
 										nChannels=nChannels, \
-										amplitudeScalingFactor = amplitudeScalingFactor)
+										amplitudeScalingFactor = amplitudeScalingFactor, \
+										frequencyResolutionStep= frequencyResolutionStep)
 		self.__data[initSample:endSample,channelsList,:] = \
 				self.__data[initSample:endSample,channelsList,:] + tmpData
 		
 		return
 
 
-
-
-	def execute(self):
-		'''
-		Generates the synthetic data from the properties
-		information.
-		
-		:return: A 3D data tensor
-		:rtype: np.ndarray
-		'''
-		
-		self.addFrequencyBand(channelsList= list(range(0,self.nChannels)), \
-								initSample = 0, endSample = -1, \
-								freqBand = 'alpha')
-		self.addFrequencyBand(channelsList= [1,4,5], \
-								initSample = round(self.nSamples/2), endSample = -1, \
-								freqBand = 'theta')
-		self.addFrequencyBand(channelsList= [2,3,4], \
-								initSample = round(self.nSamples/4), \
-								endSample  = round(3*self.nSamples/4), \
-								freqBand = 'delta')
-		self.addFrequencyBand(channelsList= [1,5], \
-								initSample = 158, \
-								endSample  = 846, \
-								freqBand = 'gamma',\
-								amplitudeScalingFactor = 2.2)
-		
-		return copy.deepcopy(self.data)
-	
-	
 	def generateFrequencyBand(self,freqBand = 'alpha',nSamples = 100, \
-							   nChannels=1, amplitudeScalingFactor = 1):
+							   nChannels = 1, amplitudeScalingFactor = 1, \
+							   frequencyResolutionStep = 0.1):
 		'''
 		Generate synthetic data with energy in the chosen frequency band
 
@@ -413,16 +407,21 @@ class EEGSignalGenerator:
 			scaling amplitudes to [0 amplitudeScalingFactor].
 			Optional. Default is 1.
 		:type amplitudeScalingFactor: float (positive)
-		
+		:param frequencyResolutionStep: The step for generating evenly spaced values
+			within the interval of frequencies of the band to be simulated.
+			Optional. Default is 0.1.
+		:type frequencyResolutionStep: float (positive)
+
 		:return: A data tensor.
 		:rtype: np.ndarray
 		
-		.. todo::
-			* Add parameter for frequencyResolutionStep
+		.. #todo::
+			#* Add parameter for frequencyResolutionStep
 		
-		.. seealso:: generateFrequencyBand
+		.. #seealso:: generateFrequencyBand
 
 		'''
+
 		#Check parameters
 		if type(freqBand) is str:
 			if not freqBand in self.frequency_bands.keys():
@@ -457,9 +456,13 @@ class EEGSignalGenerator:
 		if amplitudeScalingFactor <= 0:
 			msg = self.getClassName() + ':generateFrequencyBand: Unexpected parameter value for parameter ''amplitudeScalingFactor''.'
 			raise ValueError(msg)
-		
-		
-		frequencyResolutionStep = 0.1 #[Hz] - Possibly make a parameter
+		if type(frequencyResolutionStep) is not float:
+			msg = self.getClassName() + ':generateFrequencyBand: Unexpected parameter type for parameter ''frequencyResolutionStep''.'
+			raise ValueError(msg)
+		if frequencyResolutionStep <= 0:
+			msg = self.getClassName() + ':generateFrequencyBand: Unexpected parameter value for parameter ''frequencyResolutionStep''.'
+			raise ValueError(msg)
+
 		freqBand.sort() #Ensure the min frequency is the first element.
 		timestamps = np.arange(0, nSamples/self.samplingRate, \
 								  1/self.samplingRate, dtype = float)
@@ -487,19 +490,48 @@ class EEGSignalGenerator:
 		return synthData
 
 
+	def execute(self):
+		'''
+		Generates the synthetic data from the properties
+		information.
+
+		:return: A 3D data tensor
+		:rtype: np.ndarray
+		'''
+
+		self.addFrequencyBand(channelsList=list(range(0, self.nChannels)), \
+							  initSample=0, endSample=-1, \
+							  freqBand='alpha')
+		self.addFrequencyBand(channelsList=[1, 4, 5], \
+							  initSample=round(self.nSamples / 2), endSample=-1, \
+							  freqBand='theta')
+		self.addFrequencyBand(channelsList=[2, 3, 4], \
+							  initSample=round(self.nSamples / 4), \
+							  endSample=round(3 * self.nSamples / 4), \
+							  freqBand='delta')
+		self.addFrequencyBand(channelsList=[1, 5], \
+							  initSample=158, \
+							  endSample=846, \
+							  freqBand='gamma', \
+							  amplitudeScalingFactor=2.2)
+
+		return copy.deepcopy(self.data)
+
 
 def plotSyntheticEEG(tensor):
 	'''
 	Quick rendering of the synthetic EEG data tensor.
 	'''
+
 	nChannels = tensor.shape[1]
 	for iCh in range(0,nChannels):
 		plt.plot(tensor[:,iCh,0]+10*iCh)
 	plt.xlabel('Time [samples]')
 	plt.ylabel('Channels [A.U.]')
 	plt.show()
+
 	return
-	
+
 
 def main():
 	sg = EEGSignalGenerator(nSamples = 3000, nChannels = 6)
