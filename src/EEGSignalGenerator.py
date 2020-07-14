@@ -93,6 +93,7 @@ class EEGSignalGenerator:
 		self.data = np.zeros((nSamples,nChannels,1),dtype=float)
 		
 		return
+	#end __init__(self, nSamples = 1, nChannels = 1)
 
 
 	#Properties getters/setters
@@ -117,10 +118,12 @@ class EEGSignalGenerator:
 		'''
 
 		return copy.deepcopy(self.__data)
+	#end data(self)
 
 	@data.setter
 	def data(self,newData): #data setter
 
+		#Check parameters
 		if type(newData) is not np.ndarray:
 			msg = self.getClassName() + ':data: Unexpected attribute type.'
 			raise ValueError(msg)
@@ -134,7 +137,9 @@ class EEGSignalGenerator:
 			raise ValueError(msg)
 			
 		self.__data = copy.deepcopy(newData)
+
 		return None
+	#end data(self,newData)
 
 
 	@property
@@ -149,6 +154,7 @@ class EEGSignalGenerator:
 		'''
 
 		return copy.deepcopy(self.__frequency_bands)
+	#end frequency_bands(self)
 
 
 	@property
@@ -173,10 +179,12 @@ class EEGSignalGenerator:
 		'''
 
 		return self.__data.shape[1]
+	#end nChannels(self)
 
 	@nChannels.setter
 	def nChannels(self,newNChannels): #nChannels setter
 
+		#Check parameters
 		if type(newNChannels) is not int:
 			msg = self.getClassName() + ':nChannels: Unexpected attribute type.'
 			raise ValueError(msg)
@@ -195,6 +203,7 @@ class EEGSignalGenerator:
 			self.data = copy.deepcopy(self.data[:,0:newNChannels,:])
 
 		return None
+	#end nChannels(self,newNChannels)
 
 
 	@property
@@ -218,10 +227,12 @@ class EEGSignalGenerator:
 		'''
 
 		return self.__data.shape[0]
+	#end nSamples(self)
 
 	@nSamples.setter
 	def nSamples(self,newNSamples): #nSamples setter
 
+		#Check parameters
 		if type(newNSamples) is not int:
 			msg = self.getClassName() + ':nSamples: Unexpected attribute type.'
 			raise ValueError(msg)
@@ -240,6 +251,7 @@ class EEGSignalGenerator:
 			self.data = copy.deepcopy(self.data[0:newNSamples,:,:])
 
 		return None
+	#end nSamples(self,newNSamples)
 
 
 	@property
@@ -253,10 +265,12 @@ class EEGSignalGenerator:
 		'''
 
 		return self.__samplingRate
+	#end samplingRate(self)
 
 	@samplingRate.setter
 	def samplingRate(self,newSamplingRate): #samplingrate setter
 
+		#Check parameters
 		if type(newSamplingRate) is int:
 			newSamplingRate = float(newSamplingRate)
 		if type(newSamplingRate) is not float:
@@ -268,7 +282,9 @@ class EEGSignalGenerator:
 			raise ValueError(msg)
 			
 		self.__samplingRate = newSamplingRate
+
 		return None
+	#end samplingRate(self,newSamplingRate)
 
 
 	#Private methods
@@ -287,6 +303,7 @@ class EEGSignalGenerator:
 		'''
 
 		return type(self).__name__
+	#end getClassName(self)
 
 
 	def addFrequencyBand(self,channelsList = list(), initSample = 0, endSample = -1, \
@@ -337,6 +354,7 @@ class EEGSignalGenerator:
 		
 		'''
 
+		#Check parameters
 		if type(channelsList) is not list:
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter type for parameter ''channelList''.'
 			raise ValueError(msg)
@@ -344,22 +362,22 @@ class EEGSignalGenerator:
 			if type(elem) is not int:
 				msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter value for parameter ''channelList''.'
 				raise ValueError(msg)
-			if elem < 0 or elem >= self.nChannels: #Ensure the channel exist
+			if elem < 0 or elem >= self.nChannels: #Ensure the nChannels exist
 				msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter value for parameter ''channelList''.'
 				raise ValueError(msg)
 		if type(initSample) is not int:
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter type for parameter ''initSample''.'
 			raise ValueError(msg)
-		if initSample < 0 or initSample >= self.nSamples: #Ensure the initSample exist
+		if initSample < 0 or initSample >= self.nSamples: #Ensure the nSamples exist
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter value for parameter ''initSample''.'
 			raise ValueError(msg)
 		if type(endSample) is not int:
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter type for parameter ''endSample''.'
 			raise ValueError(msg)
-		if endSample < -1 or endSample >= self.nSamples: #Ensure the endSample exist
+		if endSample < -1 or endSample >= self.nSamples: #Ensure the nSamples exist
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter value for parameter ''endSample''.'
 			raise ValueError(msg)
-		if endSample == -1: #If -1, substitute by the maximumlast sample
+		if endSample == -1: #If -1, substitute by the maximum last sample
 			endSample = self.nSamples-1
 		if endSample <= initSample: #Ensure the endSample is posterior to the initSample
 			msg = self.getClassName() + ':addFrequencyBand: Unexpected parameter value for parameter ''endSample''.'
@@ -380,13 +398,14 @@ class EEGSignalGenerator:
 				self.__data[initSample:endSample,channelsList,:] + tmpData
 		
 		return
+	#end addFrequencyBand(self,channelsList = list(), initSample = 0, ... , frequencyResolutionStep = 0.1)
 
 
 	def generateFrequencyBand(self,freqBand = 'alpha',nSamples = 100, \
 							   nChannels = 1, amplitudeScalingFactor = 1, \
 							   frequencyResolutionStep = 0.1):
 		'''
-		Generate synthetic data with energy in the chosen frequency band
+		Generates synthetic data with energy in the chosen frequency band
 
 		:Parameters:
 		
@@ -488,11 +507,12 @@ class EEGSignalGenerator:
 			synthData[:,:,0] = synthData[:,:,0] + tmpSin
 			
 		return synthData
+	#end generateFrequencyBand(self,freqBand = 'alpha',nSamples = 100, ... , frequencyResolutionStep = 0.1)
 
 
 	def execute(self):
 		'''
-		Generates the synthetic data from the properties
+		Generates the synthetic EEG data from the properties
 		information.
 
 		:return: A 3D data tensor
@@ -516,6 +536,7 @@ class EEGSignalGenerator:
 							  amplitudeScalingFactor=2.2)
 
 		return copy.deepcopy(self.data)
+	#end execute(self)
 
 
 def plotSyntheticEEG(tensor):
@@ -531,6 +552,7 @@ def plotSyntheticEEG(tensor):
 	plt.show()
 
 	return
+#end plotSyntheticEEG(tensor)
 
 
 def main():
@@ -538,7 +560,8 @@ def main():
 	sg.execute()
 	#print(sg.data)
 	plotSyntheticEEG(sg.data)
-	
+#end main()
+
 
 if __name__ == '__main__':
 	main()
