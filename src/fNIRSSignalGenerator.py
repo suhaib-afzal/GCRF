@@ -33,7 +33,7 @@ import math
 
 import matplotlib.pyplot as plt
 
-
+import CONST
 
 class fNIRSSignalGenerator:
 	'''
@@ -81,7 +81,13 @@ class fNIRSSignalGenerator:
 		
 		#Initialize
 		self.data = np.zeros((nSamples,nChannels,2),dtype=float)
-		
+
+		# Create constant HBO2 = 0 and constant HHB = 1
+		# Represent HbO2 (Oxi) and HHb (Desoxi) respectively
+		# for the third component of the tensor data.
+		CONST.HBO2 = 0
+		CONST.HHB  = 1
+
 		return
 	#end __init__(self, nSamples = 1, nChannels = 1)
 
@@ -372,6 +378,67 @@ class fNIRSSignalGenerator:
 	# end addStimulusResult(self,channelsList = list(), initSample = 0, ... , amplitudeScalingFactor=6)
 
 
+	def double_gamma_function(self, timestamps = np.arange(25, dtype=float), \
+							    tau_p = 6, tau_d = 10, amplitudeScalingFactor = 6):
+		'''
+		Generates double gamma function in the domain of timestamps
+
+		:Parameters:
+
+		:param timestamps: array of evenly spaced values representing temporal samples.
+			Optional. Default is array([0., 1., 2., ..., 24.]).
+		:type timestamps: array of float (positive)
+		:param tau_p: stands for the first peak delay, which is basically set to 6 sec. Default is 6.
+		:type tau_p: int (positive)
+		:param tau_d: stands for the second peak delay, which is basically set to 10 sec. Default is 10.
+			Represents the delay of undershoot to response.
+		:type tau_d: int (positive)
+		:param amplitudeScalingFactor: A scaling factor for the amplitude.
+			It is the amplitude ratio between the first and second peaks.
+			It was set to 6 sec. as in typical fMRI studies.
+			Default is 6.
+		:type amplitudeScalingFactor: float (positive)
+
+		:return: An array.
+		:rtype: np.ndarray
+		'''
+
+		#Check parameters
+		if type(timestamps) is not np.ndarray:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter type for parameter ''timestamps''.'
+			raise ValueError(msg)
+
+		if type(tau_p) is not int:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter type for parameter ''tau_p''.'
+			raise ValueError(msg)
+		if tau_p <= 0:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter value for parameter ''tau_p''.'
+			raise ValueError(msg)
+
+		if type(tau_d) is not int:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter type for parameter ''tau_d''.'
+			raise ValueError(msg)
+		if tau_d <= 0:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter value for parameter ''tau_d''.'
+			raise ValueError(msg)
+
+		if type(amplitudeScalingFactor) is int:
+			amplitudeScalingFactor = float(amplitudeScalingFactor)
+		if type(amplitudeScalingFactor) is not float:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter type for parameter ''amplitudeScalingFactor''.'
+			raise ValueError(msg)
+		if amplitudeScalingFactor <= 0:
+			msg = self.getClassName() + ':double_gamma_function: Unexpected parameter value for parameter ''amplitudeScalingFactor''.'
+			raise ValueError(msg)
+
+		HRF = ( pow(timestamps, tau_p) * np.exp(-1 * timestamps) ) / math.factorial(tau_p)
+		HRF = HRF - ( pow(timestamps, tau_p+tau_d) * np.exp(-1 * timestamps) ) / \
+			  		( amplitudeScalingFactor * math.factorial(tau_p+tau_d) )
+
+		return HRF
+	#end double_gamma_function(self, timestamps = np.arange(25, dtype=float), tau_p=6, ... , amplitudeScalingFactor=6)
+
+
 	def generateStimulusResult(self, boxCarList=list(), nSamples = 100, nChannels = 1, \
 							    tau_p = 6, tau_d = 10, amplitudeScalingFactor = 6):
 		'''
@@ -474,16 +541,11 @@ class fNIRSSignalGenerator:
 		plt.plot(boxCar, color='black')
 		plt.show()
 
-
-		HRF = ( pow(timestamps, tau_p) * np.exp(-1 * timestamps) ) / math.factorial(tau_p)
-		HRF = HRF - ( pow(timestamps, tau_p+tau_d) * np.exp(-1 * timestamps) ) / \
-			  		( amplitudeScalingFactor * math.factorial(tau_p+tau_d) )
+		HRF = self.double_gamma_function(timestamps, tau_p, tau_d, amplitudeScalingFactor)
 
 		# This is only for visualizing the doble gamma function
 		timestamps1 = np.arange(0, 25, 0.1, dtype=float)
-		HRF1 = ( pow(timestamps1, tau_p) * np.exp(-1 * timestamps1) ) / math.factorial(tau_p)
-		HRF1 = HRF1 - ( pow(timestamps1, tau_p+tau_d) * np.exp(-1 * timestamps1) ) / \
-			  		( amplitudeScalingFactor * math.factorial(tau_p+tau_d) )
+		HRF1 = self.double_gamma_function(timestamps1, tau_p, tau_d, amplitudeScalingFactor)
 		plt.plot(HRF1, color='green')
 		plt.show()
 
@@ -499,8 +561,8 @@ class fNIRSSignalGenerator:
 
 		synthData = np.zeros((nSamples, nChannels, 2)) #The synthetic data tensor
 
-		synthData[:, :, 0] = synthData[:, :, 0] + HbO2[0:nSamples, :]
-		synthData[:, :, 1] = synthData[:, :, 1] + HHb[0:nSamples, :]
+		synthData[:, :, CONST.HBO2] = synthData[:, :, CONST.HBO2] + HbO2[0:nSamples, :]
+		synthData[:, :, CONST.HHB]  = synthData[:, :, CONST.HHB]  + HHb[0:nSamples, :]
 
 		return synthData
 	#end generateStimulusResult(self, nSamples = 100, nChannels = 1, ... , amplitudeScalingFactor=6)
@@ -589,7 +651,177 @@ class fNIRSSignalGenerator:
 	#end addGaussianNoise(self, channelsList=list(), initSample=0, endSample=-1)
 
 
-	def addNoiseBreathingRate(self, channelsList=list(), initSample=0, endSample=-1, \
+	def addPhysiologicalNoise(self, channelsList=list(), initSample=0, endSample=-1, \
+							   frequencyMean = 0.22, frequencySD = 0.07, \
+							   frequencyResolutionStep = 0.01):
+		'''
+		Adds physiological noise to the data tensor.
+		The generated noise is added to the class :attr:`data`.
+
+		:Parameters:
+
+		:param channelsList: List of channels affected. Default is the empty list.
+		:type channelsList: list
+		:param initSample: Initial temporal sample. Default is 0.
+		:type initSample: int (positive)
+		:param endSample: Last temporal sample. A positive value
+			explicitly indicates a sample. A value -1 indicates the last
+			sample of :attr:`data`. If not -1, then the endSample must be
+			greater than the initSample. Default is -1.
+		:type endSample: int (positive or -1)
+		:param frequencyMean: The frequency mean that corresponds to the physiological noise
+			Optional. Default is 0.22 (this is for the breathing rate noise.
+			It could be the corresponding of any of the other physiological noises)
+		:type frequencyMean: float (positive)
+		:param frequencySD: The frequency standard deviation that corresponds to the physiological noise
+			Optional. Default is 0.07 (this is for the breathing rate noise.
+			It could be the corresponding of any of the other physiological noises)
+		:type frequencySD: float (positive)
+		:param frequencyResolutionStep: The step for generating evenly spaced values
+			within the interval of frequencies of the noise to be simulated.
+			Optional. Default is 0.01.
+		:type frequencyResolutionStep: float (positive)
+
+		:return: None
+		:rtype: NoneType
+		'''
+
+		#Check parameters
+		if type(channelsList) is not list:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter type for parameter ''channelList''.'
+			raise ValueError(msg)
+		for elem in channelsList:
+			if type(elem) is not int:
+				msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''channelList''.'
+				raise ValueError(msg)
+			if elem < 0 or elem >= self.nChannels:  # Ensure the nChannels exist
+				msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''channelList''.'
+				raise ValueError(msg)
+
+		if type(initSample) is not int:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter type for parameter ''initSample''.'
+			raise ValueError(msg)
+		if initSample < 0 or initSample >= self.nSamples:  # Ensure the nSamples exist
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''initSample''.'
+			raise ValueError(msg)
+
+		if type(endSample) is not int:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter type for parameter ''endSample''.'
+			raise ValueError(msg)
+		if endSample < -1 or endSample >= self.nSamples:  # Ensure the nSamples exist
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''endSample''.'
+			raise ValueError(msg)
+		if endSample == -1:  # If -1, substitute by the maximum last sample
+			endSample = self.nSamples - 1
+		if endSample <= initSample:  # Ensure the endSample is posterior to the initSample
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''endSample''.'
+			raise ValueError(msg)
+
+		if type(frequencyMean) is not float:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter type for parameter ''frequencyMean''.'
+			raise ValueError(msg)
+		if frequencyMean <= 0:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''frequencyMean''.'
+			raise ValueError(msg)
+
+		if type(frequencySD) is not float:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter type for parameter ''frequencySD''.'
+			raise ValueError(msg)
+		if frequencySD <= 0:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''frequencySD''.'
+			raise ValueError(msg)
+
+		if type(frequencyResolutionStep) is not float:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter type for parameter ''frequencyResolutionStep''.'
+			raise ValueError(msg)
+		if frequencyResolutionStep <= 0:
+			msg = self.getClassName() + ':addPhysiologicalNoise: Unexpected parameter value for parameter ''frequencyResolutionStep''.'
+			raise ValueError(msg)
+
+		channelsList = list(set(channelsList))  # Unique and sort elements
+		nChannels = len(channelsList)
+		nSamples = endSample - initSample
+
+		tmpData = np.zeros((nSamples, nChannels, 2)) #The temporal data tensor for saving the generated noise
+
+		timestamps = np.arange(0, nSamples/self.samplingRate, \
+								  1/self.samplingRate, dtype = float)
+		timestamps = timestamps.reshape(-1, 1) #Reshape to column vector
+		timestamps = np.tile(timestamps,nChannels)
+		#timestamps = np.tile(timestamps, [1, 1, 2]) # for generating a timestamps tensor
+
+		frequencySet = np.arange(frequencyMean-2*frequencySD, \
+								 frequencyMean+2*frequencySD+frequencyResolutionStep, \
+								 frequencyResolutionStep, dtype = float)   # From paper (Elwell et al., 1999)
+		amplitudeScalingFactor = 1   # estandarizada para la distribución tenga media 0 y desv 1 z-score
+		for freq in frequencySet:
+			#Amplitude. One random amplitude per channel
+			A = amplitudeScalingFactor*np.random.rand(1,nChannels)
+			A = np.tile(A,[nSamples,1])
+			#Phase [rad]. One random phase per channel
+			theta = 2* math.pi * np.random.rand(1,nChannels) - math.pi
+			theta = np.tile(theta,[nSamples,1])
+			#theta = 0
+			#Generate the fundamental signal
+			tmpSin = A * np.sin(2*math.pi*freq*timestamps+theta)
+			#Elment-wise multiplication with the amplitude
+				#NOTE: In python NumPy, a*b among ndarrays is the
+				#element-wise product. For matrix multiplication, one
+				#need to do np.matmul(a,b)
+			tmpData[:,:,CONST.HBO2] = tmpData[:,:,CONST.HBO2] + tmpSin
+			tmpData[:,:,CONST.HHB]  = tmpData[:,:,CONST.HHB]  + (-1/3)*tmpSin
+
+		#plt.plot(tmpSin[0:nSamples,0], color='blue')
+		#plt.show()
+
+		#TODO: al tener la señal final se debe estandarizar z_score  eliminar la media y dividir por la desv. stand
+
+		self.__data[0:nSamples,channelsList,:] = \
+				self.__data[0:nSamples,channelsList,:] + tmpData
+
+		return
+	#end addPhysiologicalNoise(self, channelsList=list(), initSample=0, ... , frequencyResolutionStep = 0.01)
+
+
+	def addHeartRateNoise(self, channelsList=list(), initSample=0, endSample=-1, \
+							   frequencyResolutionStep = 0.01):
+		'''
+		Adds noise of heart rate to the data tensor.
+		The generated noise is added to the class :attr:`data`.
+
+		:Parameters:
+
+		:param channelsList: List of channels affected. Default is the empty list.
+		:type channelsList: list
+		:param initSample: Initial temporal sample. Default is 0.
+		:type initSample: int (positive)
+		:param endSample: Last temporal sample. A positive value
+			explicitly indicates a sample. A value -1 indicates the last
+			sample of :attr:`data`. If not -1, then the endSample must be
+			greater than the initSample. Default is -1.
+		:type endSample: int (positive or -1)
+		:param frequencyResolutionStep: The step for generating evenly spaced values
+			within the interval of frequencies of the noise to be simulated.
+			Optional. Default is 0.01.
+		:type frequencyResolutionStep: float (positive)
+
+		:return: None
+		:rtype: NoneType
+		'''
+
+		#Check parameters
+		#No need to type check channelsList, initSample, endSample and frequencyResolutionStep as
+		#these are passed to method addPhysiologicalNoise.
+
+		self.addPhysiologicalNoise(channelsList, initSample, endSample, \
+								  frequencyMean=1.08, frequencySD=0.16, \
+								  frequencyResolutionStep=0.01)  # From paper (Elwell et al., 1999)
+
+		return
+	#end addHeartRateNoise(self, channelsList=list(), initSample=0, ... , frequencyResolutionStep = 0.01)
+
+
+	def addBreathingRateNoise(self, channelsList=list(), initSample=0, endSample=-1, \
 							   frequencyResolutionStep = 0.01):
 		'''
 		Adds noise of breathing rate to the data tensor.
@@ -616,85 +848,53 @@ class fNIRSSignalGenerator:
 		'''
 
 		#Check parameters
-		if type(channelsList) is not list:
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter type for parameter ''channelList''.'
-			raise ValueError(msg)
-		for elem in channelsList:
-			if type(elem) is not int:
-				msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter value for parameter ''channelList''.'
-				raise ValueError(msg)
-			if elem < 0 or elem >= self.nChannels:  # Ensure the nChannels exist
-				msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter value for parameter ''channelList''.'
-				raise ValueError(msg)
+		#No need to type check channelsList, initSample, endSample and frequencyResolutionStep as
+		#these are passed to method addPhysiologicalNoise.
 
-		if type(initSample) is not int:
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter type for parameter ''initSample''.'
-			raise ValueError(msg)
-		if initSample < 0 or initSample >= self.nSamples:  # Ensure the nSamples exist
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter value for parameter ''initSample''.'
-			raise ValueError(msg)
-
-		if type(endSample) is not int:
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter type for parameter ''endSample''.'
-			raise ValueError(msg)
-		if endSample < -1 or endSample >= self.nSamples:  # Ensure the nSamples exist
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter value for parameter ''endSample''.'
-			raise ValueError(msg)
-		if endSample == -1:  # If -1, substitute by the maximum last sample
-			endSample = self.nSamples - 1
-		if endSample <= initSample:  # Ensure the endSample is posterior to the initSample
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter value for parameter ''endSample''.'
-			raise ValueError(msg)
-
-		if type(frequencyResolutionStep) is not float:
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter type for parameter ''frequencyResolutionStep''.'
-			raise ValueError(msg)
-		if frequencyResolutionStep <= 0:
-			msg = self.getClassName() + ':addNoiseBreathingRate: Unexpected parameter value for parameter ''frequencyResolutionStep''.'
-			raise ValueError(msg)
-
-		channelsList = list(set(channelsList))  # Unique and sort elements
-		nChannels = len(channelsList)
-		nSamples = endSample - initSample
-
-		tmpData = np.zeros((nSamples, nChannels, 2)) #The temporal data tensor for saving the generated noise
-
-		timestamps = np.arange(0, nSamples/self.samplingRate, \
-								  1/self.samplingRate, dtype = float)
-		timestamps = timestamps.reshape(-1, 1) #Reshape to column vector
-		timestamps = np.tile(timestamps,nChannels)
-		#timestamps = np.tile(timestamps, [1, 1, 2]) # for generating a timestamps tensor
-
-		frequencySet = np.arange(0.22-2*0.07, 0.22+2*0.07+frequencyResolutionStep, \
-								 frequencyResolutionStep, dtype = float)   # From paper (Elwell et al., 1999)
-		amplitudeScalingFactor = 1   # estandarizada para la distribución tenga media 0 y desv 1 z-score
-		for freq in frequencySet:
-			#Amplitude. One random amplitude per channel
-			A = amplitudeScalingFactor*np.random.rand(1,nChannels)
-			A = np.tile(A,[nSamples,1])
-			#Phase [rad]. One random phase per channel
-			theta = 2* math.pi * np.random.rand(1,nChannels) - math.pi
-			theta = np.tile(theta,[nSamples,1])
-			#theta = 0
-			#Generate the fundamental signal
-			tmpSin = A * np.sin(2*math.pi*freq*timestamps+theta)
-			#Elment-wise multiplication with the amplitude
-				#NOTE: In python NumPy, a*b among ndarrays is the
-				#element-wise product. For matrix multiplication, one
-				#need to do np.matmul(a,b)
-			tmpData[:,:,0] = tmpData[:,:,0] + tmpSin   # definir constante para HbO2 y otra para Hbb
-			tmpData[:,:,1] = tmpData[:,:,1] + (-1/3)*tmpSin
-
-		#plt.plot(tmpSin[0:nSamples,0], color='blue')
-		#plt.show()
-
-		# al tener la señal final se debe estandarizar z_score  eliminar la media y dividir por la desv. stand
-
-		self.__data[0:nSamples,channelsList,:] = \
-				self.__data[0:nSamples,channelsList,:] + tmpData
+		self.addPhysiologicalNoise(channelsList, initSample, endSample, \
+								  frequencyMean=0.22, frequencySD=0.07, \
+								  frequencyResolutionStep=0.01)  # From paper (Elwell et al., 1999)
 
 		return
-	#end addNoiseBreathingRate(self, channelsList=list(), initSample=0, ... , frequencyResolutionStep = 0.01)
+	#end addBreathingRateNoise(self, channelsList=list(), initSample=0, ... , frequencyResolutionStep = 0.01)
+
+
+	def addVasomotionNoise(self, channelsList=list(), initSample=0, endSample=-1, \
+							   frequencyResolutionStep = 0.01):
+		'''
+		Adds noise of vasomotion to the data tensor.
+		The generated noise is added to the class :attr:`data`.
+
+		:Parameters:
+
+		:param channelsList: List of channels affected. Default is the empty list.
+		:type channelsList: list
+		:param initSample: Initial temporal sample. Default is 0.
+		:type initSample: int (positive)
+		:param endSample: Last temporal sample. A positive value
+			explicitly indicates a sample. A value -1 indicates the last
+			sample of :attr:`data`. If not -1, then the endSample must be
+			greater than the initSample. Default is -1.
+		:type endSample: int (positive or -1)
+		:param frequencyResolutionStep: The step for generating evenly spaced values
+			within the interval of frequencies of the noise to be simulated.
+			Optional. Default is 0.01.
+		:type frequencyResolutionStep: float (positive)
+
+		:return: None
+		:rtype: NoneType
+		'''
+
+		#Check parameters
+		#No need to type check channelsList, initSample, endSample and frequencyResolutionStep as
+		#these are passed to method addPhysiologicalNoise.
+
+		self.addPhysiologicalNoise(channelsList, initSample, endSample, \
+								  frequencyMean=0.082, frequencySD=0.016, \
+								  frequencyResolutionStep=0.01)  # From paper (Elwell et al., 1999)
+
+		return
+	#end addVasomotionNoise(self, channelsList=list(), initSample=0, ... , frequencyResolutionStep = 0.01)
 
 
 	def execute(self):
@@ -723,7 +923,19 @@ class fNIRSSignalGenerator:
 
 		plotSyntheticfNIRS(self.data)
 
-		self.addNoiseBreathingRate(channelsList=list(range(0, self.nChannels)), \
+		self.addBreathingRateNoise(channelsList=list(range(0, self.nChannels)), \
+								   initSample=0, endSample=-1, \
+								   frequencyResolutionStep = 0.01)
+
+		plotSyntheticfNIRS(self.data)
+
+		self.addHeartRateNoise(channelsList=list(range(0, self.nChannels)), \
+								   initSample=0, endSample=-1, \
+								   frequencyResolutionStep = 0.01)
+
+		plotSyntheticfNIRS(self.data)
+
+		self.addVasomotionNoise(channelsList=list(range(0, self.nChannels)), \
 								   initSample=0, endSample=-1, \
 								   frequencyResolutionStep = 0.01)
 
