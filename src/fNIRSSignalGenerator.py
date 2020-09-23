@@ -33,7 +33,9 @@ import math
 
 import matplotlib.pyplot as plt
 
-import CONST
+#from scipy import stats
+
+#import CONST
 
 class fNIRSSignalGenerator:
 	'''
@@ -85,8 +87,8 @@ class fNIRSSignalGenerator:
 		# Create constant HBO2 = 0 and constant HHB = 1
 		# Represent HbO2 (Oxi) and HHb (Desoxi) respectively
 		# for the third component of the tensor data.
-		CONST.HBO2 = 0
-		CONST.HHB  = 1
+		self.__HBO2 = 0
+		self.__HHB  = 1
 
 		return
 	#end __init__(self, nSamples = 1, nChannels = 1)
@@ -96,6 +98,63 @@ class fNIRSSignalGenerator:
 	#
 	# Remember: Sphinx ignores docstrings on property setters so all
 	#documentation for a property must be on the @property method
+
+	# Note that python does not have constants nor static constants,
+	# so in order to have a constant, a new property is defined
+	# with only a getter method and the setter method raises an error message.
+	@property
+	def HBO2(self):  # HBO2 getter
+		'''
+		Constant HBO2 = 0
+		Represents HbO2 (Oxi) for the third component of the tensor data.
+
+		:getter: Gets constant HBO2.
+		:type: int
+		'''
+
+		return 0
+	# end HBO2(self)
+
+	@HBO2.setter
+	def HBO2(self, value):  # HBO2 setter
+		'''
+		Constant HBO2 = 0
+		Represents HbO2 (Oxi) for the third component of the tensor data.
+
+		:setter: Raise an error message because the value of constant HBO2 is being tried to be changed.
+		:type: int
+		'''
+
+		msg = self.getClassName() + ':HBO2: ConstantError: Can not rebind const.'
+		raise ValueError(msg)
+	# end HBO2(self, value)
+
+	@property
+	def HHB(self):  # HHB getter
+		'''
+		Constant HHB = 1
+		Represents HHb (Desoxi) for the third component of the tensor data.
+
+		:getter: Gets constant HHB.
+		:type: int
+		'''
+
+		return 1
+	# end HHB(self)
+
+	@HHB.setter
+	def HHB(self, value):  # HHB setter
+		'''
+		Constant HHB = 1
+		Represents HHb (Desoxi) for the third component of the tensor data.
+
+		:setter: Raise an error message because the value of constant HHB is being tried to be changed.
+		:type: int
+		'''
+
+		msg = self.getClassName() + ':HHB: ConstantError: Can not rebind const.'
+		raise ValueError(msg)
+	# end HHB(self, value)
 
 	@property
 	def data(self): #data getter
@@ -287,8 +346,12 @@ class fNIRSSignalGenerator:
 	#end getClassName(self)
 
 
-	def addStimulusResult(self, boxCarList=list(), channelsList=list(), initSample=0, endSample=-1, \
-						   tau_p=6, tau_d=10, amplitudeScalingFactor=6):
+	def addStimulusResult(self, channelsList=list(), boxCarList=list(), initSample=0, endSample=-1, \
+						   tau_p=6, tau_d=10, amplitudeScalingFactor=6, \
+						   enableHbO2Channels = np.ones(1, dtype=int), \
+						   enableHHbChannels = np.ones(1, dtype=int), \
+						   enableHbO2Blocks = np.ones(1, dtype=int), \
+						   enableHHbBlocks = np.ones(1, dtype=int)):
 		'''
 		Adds a stimulus result to the data tensor.
 
@@ -299,13 +362,13 @@ class fNIRSSignalGenerator:
 
 		:Parameters:
 
+		:param channelsList: List of channels affected. Default is the empty list.
+		:type channelsList: list
 		:param boxCarList: List of tuples. Each tuple is a pair (xi, yi).
 			(xi, yi) is an interval where the boxcar is equal to 1.
 			0 <= xi, yi < nSamples/samplingRate, xi < yi.
 			Default is the empty list.
 		:type boxCarList: list
-		:param channelsList: List of channels affected. Default is the empty list.
-		:type channelsList: list
 		:param initSample: Initial temporal sample. Default is 0.
 		:type initSample: int (positive)
 		:param endSample: Last temporal sample. A positive value
@@ -323,6 +386,30 @@ class fNIRSSignalGenerator:
 			It was set to 6 sec. as in typical fMRI studies.
 			Default is 6.
 		:type amplitudeScalingFactor: float (positive)
+		:param enableHbO2Channels: A vector whose length is nChannels. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding channel has the HbO2 signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			channels (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)
+			is applied.
+		:type numpy.ndarray
+		:param enableHHbChannels: A vector whose length is nChannels. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding channel has the HHb signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			channels (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)
+			is applied.
+		:type numpy.ndarray
+		:param enableHbO2Blocks: A vector whose length is nBlocks. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding block has the HbO2 signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			blocks (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)   OJO
+			is applied.
+		:type numpy.ndarray
+		:param enableHHbBlocks: A vector whose length is nBlocks. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding block has the HHb signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			blocks (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)   OJO
+			is applied.
+		:type numpy.ndarray
 
 		:return: None
 		:rtype: NoneType
@@ -358,7 +445,8 @@ class fNIRSSignalGenerator:
 		if endSample <= initSample:  # Ensure the endSample is posterior to the initSample
 			msg = self.getClassName() + ':addStimulusResult: Unexpected parameter value for parameter ''endSample''.'
 			raise ValueError(msg)
-		#No need to type check boxCarList, tau_p, tau_d and amplitudeScalingFactor as these
+		#No need to type check boxCarList, tau_p, tau_d, amplitudeScalingFactor, enableHbO2Channels, enableHHbChannels,
+		#enableHbO2Blocks, and enableHHbBlocks as these
 		#are passed to method generateStimulusResult.
 
 		channelsList = list(set(channelsList))  # Unique and sort elements
@@ -369,13 +457,16 @@ class fNIRSSignalGenerator:
 											  nChannels=nChannels, \
 											  tau_p=tau_p, \
 											  tau_d=tau_d, \
-											  amplitudeScalingFactor=amplitudeScalingFactor)
+											  amplitudeScalingFactor=amplitudeScalingFactor, \
+											  enableHbO2Channels=enableHbO2Channels, \
+											  enableHHbChannels=enableHHbChannels, \
+											  enableHbO2Blocks=enableHbO2Blocks, \
+											  enableHHbBlocks=enableHHbBlocks)
 		self.__data[initSample:endSample, channelsList, :] = \
 			self.__data[initSample:endSample, channelsList, :] + tmpData
 
 		return
-
-	# end addStimulusResult(self,channelsList = list(), initSample = 0, ... , amplitudeScalingFactor=6)
+	# end addStimulusResult(self,channelsList = list(), boxCarList=list(), initSample = 0, ... , enableHHbBlocks = np.ones(1, dtype=int))
 
 
 	def double_gamma_function(self, timestamps = np.arange(25, dtype=float), \
@@ -400,7 +491,7 @@ class fNIRSSignalGenerator:
 		:type amplitudeScalingFactor: float (positive)
 
 		:return: An array.
-		:rtype: np.ndarray
+		:rtype: numpy.ndarray
 		'''
 
 		#Check parameters
@@ -440,7 +531,12 @@ class fNIRSSignalGenerator:
 
 
 	def generateStimulusResult(self, boxCarList=list(), nSamples = 100, nChannels = 1, \
-							    tau_p = 6, tau_d = 10, amplitudeScalingFactor = 6):
+							    tau_p = 6, tau_d = 10, amplitudeScalingFactor = 6, \
+							    enableHbO2Channels=np.ones(1, dtype=int), \
+							    enableHHbChannels =np.ones(1, dtype=int), \
+							    enableHbO2Blocks  =np.ones(1, dtype=int), \
+							    enableHHbBlocks   =np.ones(1, dtype=int)):
+
 		'''
 		Generates synthetic data for the stimulus whose times of occurrence are on the supplied boxcar
 
@@ -467,27 +563,51 @@ class fNIRSSignalGenerator:
 			It was set to 6 sec. as in typical fMRI studies.
 			Default is 6.
 		:type amplitudeScalingFactor: float (positive)
+		:param enableHbO2Channels: A vector whose length is nChannels. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding channel has the HbO2 signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			channels (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)
+			is applied.
+		:type numpy.ndarray
+		:param enableHHbChannels: A vector whose length is nChannels. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding channel has the HHb signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			channels (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)
+			is applied.
+		:type numpy.ndarray
+		:param enableHbO2Blocks: A vector whose length is nBlocks. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding block has the HbO2 signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			blocks (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)   OJO
+			is applied.
+		:type numpy.ndarray
+		:param enableHHbBlocks: A vector whose length is nBlocks. Each position contains an integer value: 1 or 0.
+			The value 1 indicates that the corresponding block has the HHb signal enabled, and 0 indicates otherwise.
+			Default is array([1]). This array of 1´s is extended automatically, by the compiler, to the number of
+			blocks (columns) and the number of samples (rows) when the operation * (element-wise matrix multiplication)   OJO
+			is applied.
+		:type numpy.ndarray
 
 		:return: A data tensor.
-		:rtype: np.ndarray
+		:rtype: numpy.ndarray
 		'''
 
 		#Check parameters
 		if type(boxCarList) is not list:
-			msg = self.getClassName() + ':addStimulusResult: Unexpected parameter type for parameter ''boxCarList''.'
+			msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''boxCarList''.'
 			raise ValueError(msg)
 		for elem in boxCarList:
 			if type(elem) is not tuple:
-				msg = self.getClassName() + ':addStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
 				raise ValueError(msg)
 			if elem[0] < 0 or elem[0] >= self.nSamples/self.samplingRate:  # Ensure 0 <= xi < nSamples/samplingRate
-				msg = self.getClassName() + ':addStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
 				raise ValueError(msg)
 			if elem[1] < 0 or elem[1] >= self.nSamples/self.samplingRate:  # Ensure 0 <= yi < nSamples/samplingRate
-				msg = self.getClassName() + ':addStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
 				raise ValueError(msg)
 			if elem[0] >= elem[1]:  # Ensure xi < yi
-				msg = self.getClassName() + ':addStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter value for parameter ''boxCarList''.'
 				raise ValueError(msg)
 
 		if type(nSamples) is not int:
@@ -527,18 +647,75 @@ class fNIRSSignalGenerator:
 			msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter value for parameter ''amplitudeScalingFactor''.'
 			raise ValueError(msg)
 
+		if type(enableHbO2Channels) is list:
+			enableHbO2Channels = np.array(enableHbO2Channels)
+		if type(enableHbO2Channels) is not np.ndarray:
+			msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHbO2Channels''.'
+			raise ValueError(msg)
+		for i in range(0, len(enableHbO2Channels)):
+			if enableHbO2Channels[i] != 1 and enableHbO2Channels[i] != 0:
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHbO2Channels''.'
+				raise ValueError(msg)
+
+		if type(enableHHbChannels) is list:
+			enableHHbChannels = np.array(enableHHbChannels)
+		if type(enableHHbChannels) is not np.ndarray:
+			msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHHbChannels''.'
+			raise ValueError(msg)
+		for i in range(0, len(enableHHbChannels)):
+			if enableHHbChannels[i] != 1 and enableHHbChannels[i] != 0:
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHHbChannels''.'
+				raise ValueError(msg)
+
+		if type(enableHbO2Blocks) is list:
+			enableHbO2Blocks = np.array(enableHbO2Blocks)
+		if type(enableHbO2Blocks) is not np.ndarray:
+			msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHbO2Blocks''.'
+			raise ValueError(msg)
+		for i in range(0, len(enableHbO2Blocks)):
+			if enableHbO2Blocks[i] != 1 and enableHbO2Blocks[i] != 0:
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHbO2Blocks''.'
+				raise ValueError(msg)
+
+		if type(enableHHbBlocks) is list:
+			enableHHbBlocks = np.array(enableHHbBlocks)
+		if type(enableHHbBlocks) is not np.ndarray:
+			msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHHbBlocks''.'
+			raise ValueError(msg)
+		for i in range(0, len(enableHHbBlocks)):
+			if enableHHbBlocks[i] != 1 and enableHHbBlocks[i] != 0:
+				msg = self.getClassName() + ':generateStimulusResult: Unexpected parameter type for parameter ''enableHHbBlocks''.'
+				raise ValueError(msg)
+
 		timestamps = np.arange(0, nSamples/self.samplingRate, \
 								  1/self.samplingRate, dtype = float)
 
 		ntimestamps = len(timestamps)
-		boxCar = np.zeros(ntimestamps) #creation of the boxcar with 0s
+		boxCar      = np.zeros(ntimestamps) #creation of the boxcar with 0s
+		boxCarHbO2  = np.zeros(ntimestamps) #creation of the boxcar for HbO2 with 0s
+		boxCarHHb   = np.zeros(ntimestamps) #creation of the boxcar for HHb with 0s
 
+		iBlock = 0
 		for elem in boxCarList:
 			i = np.searchsorted(timestamps, elem[0])
 			j = np.searchsorted(timestamps, elem[1]) + 1
 			boxCar[i:j] = 1
+			if enableHbO2Blocks[iBlock] == 1:
+				boxCarHbO2[i:j] = 1
+			if enableHHbBlocks[iBlock] == 1:
+				boxCarHHb[i:j] = 1
+			iBlock+=1
 
 		plt.plot(boxCar, color='black')
+		plt.title('BoxCar')
+		plt.show()
+
+		plt.plot(boxCarHbO2, color='red')
+		plt.title('BoxCar with the enabled blocks for HbO2 signal')
+		plt.show()
+
+		plt.plot(boxCarHHb, color='blue')
+		plt.title('BoxCar with the enabled blocks for HHb signal')
 		plt.show()
 
 		HRF = self.double_gamma_function(timestamps, tau_p, tau_d, amplitudeScalingFactor)
@@ -547,28 +724,49 @@ class fNIRSSignalGenerator:
 		timestamps1 = np.arange(0, 25, 0.1, dtype=float)
 		HRF1 = self.double_gamma_function(timestamps1, tau_p, tau_d, amplitudeScalingFactor)
 		plt.plot(HRF1, color='green')
+		plt.title('Double gamma function')
+		plt.xlabel('Time [samples]')
+		plt.ylabel('HRF')
 		plt.show()
 
-		HbO2 = np.convolve(boxCar, HRF)
+		HbO2 = np.convolve(boxCarHbO2, HRF)
 
 		plt.plot(HbO2, color='red')
+		plt.title('Result of the convolution of HRF and the BoxCar for HbO2 signal')
 		plt.show()
 
 		HbO2 = HbO2.reshape(-1, 1) #Reshape to column vector
 		HbO2 = np.tile(HbO2, nChannels)
 
-		HHb = (-1/3) * HbO2
+		HbO2forHHb = np.convolve(boxCarHHb, HRF)
+
+		plt.plot(HbO2forHHb, color='blue')
+		plt.title('Result of the convolution of HRF and the BoxCar for HHb signal')
+		plt.show()
+
+		HbO2forHHb = HbO2forHHb.reshape(-1, 1) #Reshape to column vector
+		HbO2forHHb = np.tile(HbO2forHHb, nChannels)
+
+		HHb = (-1/3) * HbO2forHHb
 
 		synthData = np.zeros((nSamples, nChannels, 2)) #The synthetic data tensor
 
-		synthData[:, :, CONST.HBO2] = synthData[:, :, CONST.HBO2] + HbO2[0:nSamples, :]
-		synthData[:, :, CONST.HHB]  = synthData[:, :, CONST.HHB]  + HHb[0:nSamples, :]
+		print(HbO2[0:nSamples, :])
+		print(HHb[0:nSamples, :])
+
+		print(enableHHbChannels)
+
+		print(HHb[0:nSamples, :] * enableHHbChannels)
+
+		synthData[:, :, self.HBO2] = synthData[:, :, self.HBO2] + HbO2[0:nSamples, :] * enableHbO2Channels
+		synthData[:, :, self.HHB]  = synthData[:, :, self.HHB]  + HHb[0:nSamples, :] * enableHHbChannels
 
 		return synthData
-	#end generateStimulusResult(self, nSamples = 100, nChannels = 1, ... , amplitudeScalingFactor=6)
+	#end generateStimulusResult(self, boxCarList=list(), nSamples = 100, nChannels = 1, ... , enableHHbChannels = np.ones(1, dtype=int))
 
 
 	def addGaussianNoise(self, channelsList=list(), initSample=0, endSample=-1):
+
 		'''
 		Adds Gaussian noise to the data tensor.
 		The generated noise is added to the class :attr:`data`.
@@ -626,6 +824,7 @@ class fNIRSSignalGenerator:
 
 		timestamps = np.arange(0, nSamples/self.samplingRate, \
 								  1/self.samplingRate, dtype = float)
+
 		timestamps = timestamps.reshape(-1, 1) #Reshape to column vector
 		timestamps = np.tile(timestamps,nChannels)
 
@@ -636,6 +835,7 @@ class fNIRSSignalGenerator:
 		noiseHbO2_plot = np.random.normal(0, 0.3, timestamps.shape)
 
 		plt.plot(noiseHbO2_plot[0:nSamples,0], color='blue')
+		plt.title('Gaussian Noise')
 		plt.show()
 
 		#plt.plot(noiseHHb[0:nSamples,0], color='blue')
@@ -748,7 +948,6 @@ class fNIRSSignalGenerator:
 								  1/self.samplingRate, dtype = float)
 		timestamps = timestamps.reshape(-1, 1) #Reshape to column vector
 		timestamps = np.tile(timestamps,nChannels)
-		#timestamps = np.tile(timestamps, [1, 1, 2]) # for generating a timestamps tensor
 
 		frequencySet = np.arange(frequencyMean-2*frequencySD, \
 								 frequencyMean+2*frequencySD+frequencyResolutionStep, \
@@ -768,8 +967,8 @@ class fNIRSSignalGenerator:
 				#NOTE: In python NumPy, a*b among ndarrays is the
 				#element-wise product. For matrix multiplication, one
 				#need to do np.matmul(a,b)
-			tmpData[:,:,CONST.HBO2] = tmpData[:,:,CONST.HBO2] + tmpSin
-			tmpData[:,:,CONST.HHB]  = tmpData[:,:,CONST.HHB]  + (-1/3)*tmpSin
+			tmpData[:,:,self.HBO2] = tmpData[:,:,self.HBO2] + tmpSin
+			tmpData[:,:,self.HHB]  = tmpData[:,:,self.HHB]  + (-1/3)*tmpSin
 
 		#plt.plot(tmpSin[0:nSamples,0], color='blue')
 		#plt.show()
@@ -784,7 +983,7 @@ class fNIRSSignalGenerator:
 
 
 	def addHeartRateNoise(self, channelsList=list(), initSample=0, endSample=-1, \
-							   frequencyResolutionStep = 0.01):
+						  frequencyResolutionStep = 0.01):
 		'''
 		Adds noise of heart rate to the data tensor.
 		The generated noise is added to the class :attr:`data`.
@@ -810,7 +1009,7 @@ class fNIRSSignalGenerator:
 		'''
 
 		#Check parameters
-		#No need to type check channelsList, initSample, endSample and frequencyResolutionStep as
+		#No need to type check channelsList, initSample, endSample, and frequencyResolutionStep as
 		#these are passed to method addPhysiologicalNoise.
 
 		self.addPhysiologicalNoise(channelsList, initSample, endSample, \
@@ -822,7 +1021,7 @@ class fNIRSSignalGenerator:
 
 
 	def addBreathingRateNoise(self, channelsList=list(), initSample=0, endSample=-1, \
-							   frequencyResolutionStep = 0.01):
+							  frequencyResolutionStep = 0.01):
 		'''
 		Adds noise of breathing rate to the data tensor.
 		The generated noise is added to the class :attr:`data`.
@@ -848,7 +1047,7 @@ class fNIRSSignalGenerator:
 		'''
 
 		#Check parameters
-		#No need to type check channelsList, initSample, endSample and frequencyResolutionStep as
+		#No need to type check channelsList, initSample, endSample, and frequencyResolutionStep as
 		#these are passed to method addPhysiologicalNoise.
 
 		self.addPhysiologicalNoise(channelsList, initSample, endSample, \
@@ -860,7 +1059,7 @@ class fNIRSSignalGenerator:
 
 
 	def addVasomotionNoise(self, channelsList=list(), initSample=0, endSample=-1, \
-							   frequencyResolutionStep = 0.01):
+						   frequencyResolutionStep = 0.01):
 		'''
 		Adds noise of vasomotion to the data tensor.
 		The generated noise is added to the class :attr:`data`.
@@ -886,7 +1085,7 @@ class fNIRSSignalGenerator:
 		'''
 
 		#Check parameters
-		#No need to type check channelsList, initSample, endSample and frequencyResolutionStep as
+		#No need to type check channelsList, initSample, endSample, and frequencyResolutionStep as
 		#these are passed to method addPhysiologicalNoise.
 
 		self.addPhysiologicalNoise(channelsList, initSample, endSample, \
@@ -908,55 +1107,106 @@ class fNIRSSignalGenerator:
 		:return: A 3D data tensor
 		:rtype: np.ndarray
 		'''
-		self.addStimulusResult(boxCarList = [(35, 45), (105, 120), (175, 195), (240, 265)], \
-		#self.addStimulusResult(boxCarList = [(35, 45), (105, 120), (240, 265)], \
-							   channelsList=list(range(0, self.nChannels)), \
-							   initSample=0, endSample=-1, \
-							   tau_p=6, tau_d=10, \
-							   amplitudeScalingFactor=6)
 
-		#self.addStimulusResult(boxCarList = [(175, 195)], \
-		#					   channelsList=list(range(0, self.nChannels)), \
-		#					   initSample=0, endSample=-1, \
-		#					   tau_p=6, tau_d=10, \
-		#					   amplitudeScalingFactor=6)
+		channelsList = list(range(0, self.nChannels))
 
-		plotSyntheticfNIRS(self.data)
+		enableHbO2Channels = np.ones(self.nChannels, dtype=int) # all the channels are enabled for the HbO2 signal
+		#enableHbO2Channels[1] = 0   # channel 2 is disabled for the HbO2 signal
+		enableHbO2Channels[2] = 0  # channel 3 is disabled for the HbO2 signal
 
-		self.addBreathingRateNoise(channelsList=list(range(0, self.nChannels)), \
-								   initSample=0, endSample=-1, \
+		#It is possible to express 'enableHbO2Channels' as a list (the program transforms it into an array later)
+		#enableHbO2Channels = [1, 0, 1, 1] # this is for an example of 4 channels
+
+		enableHHbChannels = np.ones(self.nChannels, dtype=int) # all the channels are enabled for the HHb signal
+		enableHHbChannels[1] = 0   # channel 2 is disabled for the HHb signal
+		#enableHHbChannels[2] = 0  # channel 3 is disabled for the HHb signal
+
+		#It is possible to express 'enableHHbChannels' as a list (the program transforms it into an array later)
+		#enableHHbChannels = [1, 0, 1, 1] # this is for an example of 4 channels
+
+		#An alternative to provide the information for creating the boxCar is by the indication of the onsets and durations.
+		#For this approach, the information is provided as a list of tuples (onset, duration)
+		boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20), (240, 25)]
+
+		#The boxCarList_OnsetDurations is used to generate boxCarList, which is a list of tuples (onset, end)
+		#boxCarList is the boxCarList format expected for the methods of class fNIRSSignalGenerator
+		boxCarList = list()
+		for elem in boxCarList_OnsetDurations:
+			boxCarList.append((elem[0], elem[0]+elem[1]))
+
+		#print(boxCarList)
+
+		#boxCarList = [(175, 195)]
+		#boxCarList = [(35, 45), (105, 120), (240, 265)]
+		#boxCarList = [(35, 45), (105, 120), (175, 195), (240, 265)]
+
+		boxCarListSet = list(set(boxCarList))  # Unique and sort elements
+		nBlocks = len(boxCarListSet)
+
+		enableHbO2Blocks = np.ones(nBlocks, dtype=int) # all the blocks of the boxCar are enabled for the HbO2 signal
+		enableHbO2Blocks[1] = 0   # block 2 is disabled for the HbO2 signal in all the channels
+		#enableHbO2Blocks[2] = 0  # block 3 is disabled for the HbO2 signal in all the channels
+
+		#It is possible to express 'enableHbO2Blocks' as a list (the program transforms it into an array later)
+		#enableHbO2Blocks = [1, 0, 1, 1] # this is for an example of 4 blocks
+
+		enableHHbBlocks = np.ones(nBlocks, dtype=int) # all the blocks of the boxCar are enabled for the HHb signal
+		#enableHHbBlocks[1] = 0   # block 2 is disabled for the HHb signal in all the channels
+		enableHHbBlocks[2] = 0  # block 3 is disabled for the HHb signal in all the channels
+
+		#It is possible to express 'enableHHbBlocks' as a list (the program transforms it into an array later)
+		#enableHHbBlocks = [1, 0, 1, 1] # this is for an example of 4 blocks
+
+		self.addStimulusResult(channelsList, boxCarList,
+							   initSample=0, endSample=-1,
+							   tau_p=6, tau_d=10,
+							   amplitudeScalingFactor=6,
+							   enableHbO2Channels=enableHbO2Channels,
+							   enableHHbChannels=enableHHbChannels,
+							   enableHbO2Blocks=enableHbO2Blocks,
+							   enableHHbBlocks=enableHHbBlocks)
+
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS', enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+
+		self.addBreathingRateNoise(channelsList, initSample=0, endSample=-1, \
 								   frequencyResolutionStep = 0.01)
 
-		plotSyntheticfNIRS(self.data)
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Breathing rate noise', \
+						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
-		self.addHeartRateNoise(channelsList=list(range(0, self.nChannels)), \
-								   initSample=0, endSample=-1, \
+		self.addHeartRateNoise(channelsList, initSample=0, endSample=-1, \
 								   frequencyResolutionStep = 0.01)
 
-		plotSyntheticfNIRS(self.data)
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate and Heart rate', \
+						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
-		self.addVasomotionNoise(channelsList=list(range(0, self.nChannels)), \
-								   initSample=0, endSample=-1, \
+		self.addVasomotionNoise(channelsList, initSample=0, endSample=-1, \
 								   frequencyResolutionStep = 0.01)
 
-		plotSyntheticfNIRS(self.data)
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate, Heart rate, and Vasomotion', \
+						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
-		self.addGaussianNoise(channelsList=list(range(0, self.nChannels)), \
-							  initSample=0, endSample=-1)
+		self.addGaussianNoise(channelsList, initSample=0, endSample=-1)
+
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate, Heart rate, Vasomotion and Gaussian', \
+						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
 		return copy.deepcopy(self.data)
 	#end execute(self)
 
 
-def plotSyntheticfNIRS(tensor):
+def plotSyntheticfNIRS(tensor, title='', enableHbO2Channels=np.ones(1, dtype=int), enableHHbChannels=np.ones(1, dtype=int)):
 	'''
 	Quick rendering of the synthetic fNIRS data tensor.
 	'''
 
 	nChannels = tensor.shape[1]
 	for iCh in range(0,nChannels):
-		plt.plot(tensor[:,iCh,0]+20*iCh, color='red')
-		plt.plot(tensor[:,iCh,1]+20*iCh, color='blue')
+		if enableHbO2Channels[iCh]:
+			plt.plot(tensor[:,iCh,0]+20*iCh, color='red')
+		if enableHHbChannels[iCh]:
+			plt.plot(tensor[:,iCh,1]+20*iCh, color='blue')
+	plt.title(title)
 	plt.xlabel('Time [samples]')
 	plt.ylabel('Channels [A.U.]')
 	plt.show()
@@ -967,9 +1217,18 @@ def plotSyntheticfNIRS(tensor):
 
 def main():
 	sg = fNIRSSignalGenerator(nSamples = 3000, nChannels = 4)
+
+	# testing that constants can not receive other value
+	#print("Valor de HBO2", sg.HBO2) # The value for HBO2 constant is 0
+	#sg.HBO2 = 2
+	#print("Nuevo Valor de HBO2", sg.HBO2)
+
+	#print("Valor de HHB", sg.HHB) # The value for HHB constant is 1
+	#sg.HHB = 3
+	#print("Nuevo Valor de HHB", sg.HHB)
+
 	sg.execute()
 	#print(sg.data)
-	plotSyntheticfNIRS(sg.data)
 #end main()
 
 
