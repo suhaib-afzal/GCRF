@@ -36,14 +36,24 @@ import math
 
 import matplotlib.pyplot as plt
 
+from optodeArrayInfo import optodeArrayInfo
 
-class EEGSignalGenerator:
+from channelLocationMap import channelLocationMap
+
+# Class EEGSignalGenerator is a subclass of channelLocationMap
+class EEGSignalGenerator(channelLocationMap):
     '''
 	A basic class to generate synthetic EEG signals.
 	
 	'''
 
-    def __init__(self, nSamples=1, nChannels=1):
+    #def __init__(self, nSamples=1, nChannels=1):   # __init__ used before the creation of the class channelLocationMap
+    def __init__(self, nSamples=1, id = 1, description = 'ChannelLocationMap0001', nChannels = 1, nOptodes  = 1,
+                 chLocations = np.array([[np.NaN, np.NaN, np.NaN]]), optodesLocations = np.array([[np.NaN, np.NaN, np.NaN]]),
+                 optodesTypes = np.array([np.NaN]), referencePoints = dict(), surfacePositioningSystem = 'UI 10/20',
+                 chSurfacePositions = tuple(('',)), optodesSurfacePositions = tuple(('',)), chOptodeArrays = np.array([np.NaN]),
+                 optodesOptodeArrays = np.array([np.NaN]), pairings = np.array([[np.NaN, np.NaN]]),
+                 optodeArrays = np.array([optodeArrayInfo()])):
         '''
 		Class constructor.
 		
@@ -64,6 +74,15 @@ class EEGSignalGenerator:
 		:type nChannels: int (positive)
 		
 		'''
+        # Initialization of an object of the superclass channelLocationMap
+        super().__init__(id = id, description = description, nChannels = nChannels, nOptodes  = nOptodes,
+                         chLocations = chLocations, optodesLocations = optodesLocations,
+                         optodesTypes = optodesTypes, referencePoints = referencePoints,
+                         surfacePositioningSystem = surfacePositioningSystem,
+                         chSurfacePositions = chSurfacePositions, optodesSurfacePositions = optodesSurfacePositions,
+                         chOptodeArrays = chOptodeArrays,
+                         optodesOptodeArrays = optodesOptodeArrays, pairings = pairings,
+                         optodeArrays = optodeArrays)
 
         # Ensure all properties exist
         self.__data = np.zeros((0, 0, 0), dtype=float)
@@ -113,7 +132,7 @@ class EEGSignalGenerator:
 		
 		:getter: Gets the data.
 		:setter: Sets the data.
-		:type: int
+		:type: numpy.ndarray [nSamples x nChannels x 1]
 		'''
 
         return copy.deepcopy(self.__data)
@@ -140,6 +159,7 @@ class EEGSignalGenerator:
         return None
     # end data(self,newData)
 
+
     @property
     def frequency_bands(self):  # frequency_bands getter
         '''
@@ -153,6 +173,7 @@ class EEGSignalGenerator:
 
         return copy.deepcopy(self.__frequency_bands)
     # end frequency_bands(self)
+
 
     @property
     def nChannels(self):  # nChannels getter
@@ -202,6 +223,7 @@ class EEGSignalGenerator:
         return None
     # end nChannels(self,newNChannels)
 
+
     @property
     def nSamples(self):  # nSamples getter
         '''
@@ -248,6 +270,7 @@ class EEGSignalGenerator:
 
         return None
     # end nSamples(self,newNSamples)
+
 
     @property
     def samplingRate(self):  # samplingrate getter
@@ -658,21 +681,23 @@ class EEGSignalGenerator:
         self.addFrequencyBand(channelsList=list(range(0, self.nChannels)), \
         				  initSample=0, endSample=-1, \
         				  freqBand='alpha')
-        self.addFrequencyBand(channelsList=[1, 4, 5], \
+        self.addFrequencyBand(channelsList=[0, 1, 2, 3], \
         				  initSample=round(self.nSamples / 2), endSample=-1, \
         				  freqBand='theta')
-        self.addFrequencyBand(channelsList=[2, 3, 4], \
+        self.addFrequencyBand(channelsList=[0, 1, 2, 3], \
         				  initSample=round(self.nSamples / 4), \
         				  endSample=round(3 * self.nSamples / 4), \
         				  freqBand='delta')
-        self.addFrequencyBand(channelsList=[1, 5], \
+        self.addFrequencyBand(channelsList=[0, 1, 2, 3], \
         				  initSample=158, \
         				  endSample=846, \
         				  freqBand='gamma', \
         				  amplitudeScalingFactor=2.2)
 
         return copy.deepcopy(self.data)
-# end execute(self)
+    # end execute(self)
+
+#class EEGSignalGenerator
 
 
 def plotSyntheticEEG(tensor):
@@ -692,7 +717,38 @@ def plotSyntheticEEG(tensor):
 
 
 def main():
-    sg = EEGSignalGenerator(nSamples=3000, nChannels=6)
+    # Specifying the channel location map for the EEG signal
+    newId = 2
+    newDescription = 'ChannelLocationMap0002'
+    newNChannels = 4
+    newNOptodes = 4
+    newChLocations = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
+    newOptodesLocations = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
+    newOptodesTypes = np.array([1, 2, 2, 1])  # Remember {0: Unknown, 1: Emission or source, 2: Detector}
+    newReferencePoints = dict({'Nz': np.array([0, -18.5, 0]), 'Iz': np.array([0, 18.5, 0]),
+                               'LPA': np.array([17.5, 0, 0]), 'RPA': np.array([-17.5, 0, 0]),
+                               'Cz': np.array([0, 0, 0])})
+    newSurfacePositioningSystem = 'UI 10/20'
+    newChSurfacePositions = tuple(('Fz', 'C3', 'C4', 'Cz'))
+    newOptodesSurfacePositions = tuple(('FC5', 'CP3', 'FC6', 'CP4'))
+    newChOptodeArrays = np.array([0, 0, 0, 0])
+    newOptodesOptodeArrays = np.array([0, 0, 0, 0])
+    newPairings = np.array([[0, 1], [0, 2], [3, 1], [3, 2]])
+
+    NewChTopoArrangement = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
+    NewOptodesTopoArrangement = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
+
+    oaInfo = optodeArrayInfo(nChannels=newNChannels, nOptodes=newNOptodes, \
+                             mode='HITACHI ETG-4000 2x2 optode array', typeOptodeArray='adult', \
+                             chTopoArrangement=NewChTopoArrangement, \
+                             optodesTopoArrangement=NewOptodesTopoArrangement)
+
+    newOptodeArrays = np.array([oaInfo])
+
+    # A channelLocationMap for the EEG signals
+    sg = EEGSignalGenerator(nSamples=3000, nChannels=newNChannels, chLocations=newChLocations, referencePoints=newReferencePoints,
+                            chSurfacePositions=newChSurfacePositions, chOptodeArrays=newChOptodeArrays)
+    sg.showAttributesValues()
     sg.execute()
     # print(sg.data)
     plotSyntheticEEG(sg.data)
