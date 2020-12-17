@@ -36,34 +36,53 @@ import math
 
 import matplotlib.pyplot as plt
 
+from optodeArrayInfo import optodeArrayInfo
 
-class EEGSignalGenerator:
+from channelLocationMap import channelLocationMap
+
+# Class EEGSignalGenerator is a subclass of channelLocationMap
+class EEGSignalGenerator(channelLocationMap):
     '''
 	A basic class to generate synthetic EEG signals.
-	
+
 	'''
 
-    def __init__(self, nSamples=1, nChannels=1):
+    #def __init__(self, nSamples=1, nChannels=1):   # __init__ used before the creation of the class channelLocationMap
+    def __init__(self, nSamples=1, id = 1, description = 'ChannelLocationMap0001', nChannels = 1, nOptodes  = 1,
+                 chLocations = np.array([[np.NaN, np.NaN, np.NaN]]), optodesLocations = np.array([[np.NaN, np.NaN, np.NaN]]),
+                 optodesTypes = np.array([np.NaN]), referencePoints = dict(), surfacePositioningSystem = 'UI 10/20',
+                 chSurfacePositions = tuple(('',)), optodesSurfacePositions = tuple(('',)), chOptodeArrays = np.array([np.NaN]),
+                 optodesOptodeArrays = np.array([np.NaN]), pairings = np.array([[np.NaN, np.NaN]]),
+                 optodeArrays = np.array([optodeArrayInfo()])):
         '''
 		Class constructor.
-		
-		
+
+
 		:Properties:
-		
+
 		data: The EEG data tensor.
 		frequency_bands: The EEG frequency bands.
-		
-		
+
+
 		:Parameters:
-		
+
 		:param nSamples: Number of temporal samples.
 			Optional. Default is 1.
 		:type nSamples: int (positive)
 		:param nChannels: Number of channels.
 			Optional. Default is 1.
 		:type nChannels: int (positive)
-		
+
 		'''
+        # Initialization of an object of the superclass channelLocationMap
+        super().__init__(id = id, description = description, nChannels = nChannels, nOptodes  = nOptodes,
+                         chLocations = chLocations, optodesLocations = optodesLocations,
+                         optodesTypes = optodesTypes, referencePoints = referencePoints,
+                         surfacePositioningSystem = surfacePositioningSystem,
+                         chSurfacePositions = chSurfacePositions, optodesSurfacePositions = optodesSurfacePositions,
+                         chOptodeArrays = chOptodeArrays,
+                         optodesOptodeArrays = optodesOptodeArrays, pairings = pairings,
+                         optodeArrays = optodeArrays)
 
         # Ensure all properties exist
         self.__data = np.zeros((0, 0, 0), dtype=float)
@@ -104,16 +123,16 @@ class EEGSignalGenerator:
     def data(self):  # data getter
         '''
 		The data tensor.
-		
+
 		The data tensor always have 3 dimensions, namely:
-		
+
 		* Temporal (temporal samples)
 		* Spatial (channels)
 		* Signals (for EEG this is fixed to 1; the voltages)
-		
+
 		:getter: Gets the data.
 		:setter: Sets the data.
-		:type: int
+		:type: numpy.ndarray [nSamples x nChannels x 1]
 		'''
 
         return copy.deepcopy(self.__data)
@@ -140,13 +159,14 @@ class EEGSignalGenerator:
         return None
     # end data(self,newData)
 
+
     @property
     def frequency_bands(self):  # frequency_bands getter
         '''
 		The EEG frequency bands.
-		
+
 		This is a read-only property
-		
+
 		:getter: Gets the EEG frequency bands
 		:type: dict
 		'''
@@ -154,22 +174,23 @@ class EEGSignalGenerator:
         return copy.deepcopy(self.__frequency_bands)
     # end frequency_bands(self)
 
+
     @property
     def nChannels(self):  # nChannels getter
         '''
 		Number of channels.
-		
+
 		When setting the number of channels:
-		
-		* if the number of channels is smaller than 
+
+		* if the number of channels is smaller than
 		the current number of channels, a warning is issued
 		and the channels indexed rightmost in the data tensor will be
-		removed. 
-		* if the number of channels is greater than 
+		removed.
+		* if the number of channels is greater than
 		the current number of channels, the new channels will
 		be filled with zeros.
-		
-		
+
+
 		:getter: Gets the number of channels.
 		:setter: Sets the number of channels.
 		:type: int
@@ -202,21 +223,22 @@ class EEGSignalGenerator:
         return None
     # end nChannels(self,newNChannels)
 
+
     @property
     def nSamples(self):  # nSamples getter
         '''
 		Number of temporal samples.
-		
+
 		When setting the number of temporal samples:
-		
-		* if the number of temporal samples is smaller than 
+
+		* if the number of temporal samples is smaller than
 		the current number of temporal samples, a warning is issued
-		and the last temporal samples will be removed. 
-		* if the number of temporal samples is greater than 
+		and the last temporal samples will be removed.
+		* if the number of temporal samples is greater than
 		the current number of temporal samples, the new temporal samples will
 		be filled with zeros.
-		
-		
+
+
 		:getter: Gets the number of temporal samples.
 		:setter: Sets the number of temporal samples.
 		:type: int
@@ -249,11 +271,12 @@ class EEGSignalGenerator:
         return None
     # end nSamples(self,newNSamples)
 
+
     @property
     def samplingRate(self):  # samplingrate getter
         '''
 		Sampling rate at which the synthetic data will be generated.
-		
+
 		:getter: Gets the sampling rate.
 		:setter: Sets the sampling rate.
 		:type: float
@@ -289,7 +312,7 @@ class EEGSignalGenerator:
 
     def getClassName(self):
         '''Gets the class name.
-		
+
 		:return: The class name
 		:rtype: str
 		'''
@@ -302,13 +325,13 @@ class EEGSignalGenerator:
                          frequencyResolutionStep=0.1):
         '''
 		Adds a frequency band to the data tensor.
-		
+
 		This method calls :meth:`generateFrequencyBand` for generating
 		the new synthetic data. Here, such newly generated data tensor
 		is added to the class :attr:`data`.
-		
+
 		:Parameters:
-		
+
 		:param channelsList: List of channels affected. Default is the empty list.
 		:type channelsList: list
 		:param initSample: Initial temporal sample. Default is 0.
@@ -336,13 +359,13 @@ class EEGSignalGenerator:
 
 		:return: None
 		:rtype: NoneType
-		
+
 		.. todo::
 			* Permit the channel list to be expressed by standard positioning
 			  systems.
 
 		.. seealso:: generateFrequencyBand
-		
+
 		'''
 
         # Check parameters
@@ -398,7 +421,7 @@ class EEGSignalGenerator:
 		Generates synthetic data with energy in the chosen frequency band
 
 		:Parameters:
-		
+
 		:param freqBand: The frequency band to be simulated
 		:type freqBand: str or interval (list or tuple of 2 elements)
 			If str, then the classical frequency bands can be indicated, e.g.
@@ -423,10 +446,10 @@ class EEGSignalGenerator:
 
 		:return: A data tensor.
 		:rtype: numpy.ndarray
-		
+
 		.. #todo::
 			#* Add parameter for frequencyResolutionStep
-		
+
 		.. #seealso:: generateFrequencyBand
 
 		'''
@@ -658,21 +681,23 @@ class EEGSignalGenerator:
         self.addFrequencyBand(channelsList=list(range(0, self.nChannels)), \
         				  initSample=0, endSample=-1, \
         				  freqBand='alpha')
-        self.addFrequencyBand(channelsList=[1, 4, 5], \
+        self.addFrequencyBand(channelsList=[0, 1, 2, 3], \
         				  initSample=round(self.nSamples / 2), endSample=-1, \
         				  freqBand='theta')
-        self.addFrequencyBand(channelsList=[2, 3, 4], \
+        self.addFrequencyBand(channelsList=[0, 1, 2, 3], \
         				  initSample=round(self.nSamples / 4), \
         				  endSample=round(3 * self.nSamples / 4), \
         				  freqBand='delta')
-        self.addFrequencyBand(channelsList=[1, 5], \
+        self.addFrequencyBand(channelsList=[0, 1, 2, 3], \
         				  initSample=158, \
         				  endSample=846, \
         				  freqBand='gamma', \
         				  amplitudeScalingFactor=2.2)
 
         return copy.deepcopy(self.data)
-# end execute(self)
+    # end execute(self)
+
+#class EEGSignalGenerator
 
 
 def plotSyntheticEEG(tensor):
@@ -692,7 +717,38 @@ def plotSyntheticEEG(tensor):
 
 
 def main():
-    sg = EEGSignalGenerator(nSamples=3000, nChannels=6)
+    # Specifying the channel location map for the EEG signal
+    newId = 2
+    newDescription = 'ChannelLocationMap0002'
+    newNChannels = 4
+    newNOptodes = 4
+    newChLocations = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
+    newOptodesLocations = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
+    newOptodesTypes = np.array([1, 2, 2, 1])  # Remember {0: Unknown, 1: Emission or source, 2: Detector}
+    newReferencePoints = dict({'Nz': np.array([0, -18.5, 0]), 'Iz': np.array([0, 18.5, 0]),
+                               'LPA': np.array([17.5, 0, 0]), 'RPA': np.array([-17.5, 0, 0]),
+                               'Cz': np.array([0, 0, 0])})
+    newSurfacePositioningSystem = 'UI 10/20'
+    newChSurfacePositions = tuple(('Fz', 'C3', 'C4', 'Cz'))
+    newOptodesSurfacePositions = tuple(('FC5', 'CP3', 'FC6', 'CP4'))
+    newChOptodeArrays = np.array([0, 0, 0, 0])
+    newOptodesOptodeArrays = np.array([0, 0, 0, 0])
+    newPairings = np.array([[0, 1], [0, 2], [3, 1], [3, 2]])
+
+    NewChTopoArrangement = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
+    NewOptodesTopoArrangement = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
+
+    oaInfo = optodeArrayInfo(nChannels=newNChannels, nOptodes=newNOptodes, \
+                             mode='HITACHI ETG-4000 2x2 optode array', typeOptodeArray='adult', \
+                             chTopoArrangement=NewChTopoArrangement, \
+                             optodesTopoArrangement=NewOptodesTopoArrangement)
+
+    newOptodeArrays = np.array([oaInfo])
+
+    # A channelLocationMap for the EEG signals
+    sg = EEGSignalGenerator(nSamples=3000, nChannels=newNChannels, chLocations=newChLocations, referencePoints=newReferencePoints,
+                            chSurfacePositions=newChSurfacePositions, chOptodeArrays=newChOptodeArrays)
+    sg.showAttributesValues()
     sg.execute()
     # print(sg.data)
     plotSyntheticEEG(sg.data)

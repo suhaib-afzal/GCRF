@@ -37,24 +37,37 @@ import matplotlib.pyplot as plt
 
 #import CONST
 
-class fNIRSSignalGenerator:
+from optodeArrayInfo import optodeArrayInfo
+
+from channelLocationMap import channelLocationMap
+
+# Class fNIRSSignalGenerator is a subclass of channelLocationMap
+class fNIRSSignalGenerator(channelLocationMap):
 	'''
 	A basic class to generate synthetic fNIRS signals.
 	'''
 
-	def __init__(self, nSamples = 1, nChannels = 1):
+	#def __init__(self, nSamples = 1, nChannels = 1):   # __init__ used before the creation of the class channelLocationMap
+	def __init__(self, nSamples=1, id=1, description='ChannelLocationMap0001', nChannels=1, nOptodes=1,
+				 chLocations=np.array([[np.NaN, np.NaN, np.NaN]]),
+				 optodesLocations=np.array([[np.NaN, np.NaN, np.NaN]]),
+				 optodesTypes=np.array([np.NaN]), referencePoints=dict(), surfacePositioningSystem='UI 10/20',
+				 chSurfacePositions=tuple(('',)), optodesSurfacePositions=tuple(('',)),
+				 chOptodeArrays=np.array([np.NaN]),
+				 optodesOptodeArrays=np.array([np.NaN]), pairings=np.array([[np.NaN, np.NaN]]),
+				 optodeArrays=np.array([optodeArrayInfo()])):
 		'''
 		Class constructor.
-		
-		
+
+
 		:Properties:
-		
+
 		data: The fNIRS data tensor.
 		#frequency_bands: The EEG frequency bands.
-		
-		
+
+
 		:Parameters:
-		
+
 		:param nSamples: Number of temporal samples.
 			Optional. Default is 1.
 		:type nSamples: int (positive)
@@ -62,7 +75,16 @@ class fNIRSSignalGenerator:
 			Optional. Default is 1.
 		:type nChannels: int (positive)
 		'''
-		
+		# Initialization of an object of the superclass channelLocationMap
+		super().__init__(id = id, description = description, nChannels = nChannels, nOptodes = nOptodes,
+						 chLocations = chLocations, optodesLocations = optodesLocations,
+						 optodesTypes = optodesTypes, referencePoints = referencePoints,
+						 surfacePositioningSystem = surfacePositioningSystem,
+						 chSurfacePositions = chSurfacePositions, optodesSurfacePositions = optodesSurfacePositions,
+						 chOptodeArrays = chOptodeArrays,
+						 optodesOptodeArrays = optodesOptodeArrays, pairings = pairings,
+						 optodeArrays = optodeArrays)
+
 		#Ensure all properties exist
 		self.__data = np.zeros((0,0,0),dtype=float)
 		self.__samplingRate = 10 #[Hz]
@@ -80,7 +102,7 @@ class fNIRSSignalGenerator:
 		if nChannels < 0:
 			msg = self.getClassName() + ':__init__: Unexpected parameter value for parameter ''nChannels''.'
 			raise ValueError(msg)
-		
+
 		#Initialize
 		self.data = np.zeros((nSamples,nChannels,2),dtype=float)
 
@@ -156,20 +178,21 @@ class fNIRSSignalGenerator:
 		raise ValueError(msg)
 	# end HHB(self, value)
 
+
 	@property
 	def data(self): #data getter
 		'''
 		The data tensor.
-		
+
 		The data tensor always have 3 dimensions, namely:
-		
+
 		* Temporal (temporal samples)
 		* Spatial (channels)
 		* Signals (for fNIRS this is fixed to 2; the oxygenated (HbO2) and the deoxygenated (HHb) hemoglobin)
-		
+
 		:getter: Gets the data.
 		:setter: Sets the data.
-		:type: int
+		:type: numpy.ndarray [nSamples x nChannels x 2]
 		'''
 
 		return copy.deepcopy(self.__data)
@@ -190,7 +213,7 @@ class fNIRSSignalGenerator:
 			msg = self.getClassName() + ':data: Unexpected attribute value. ' \
 					+ 'Number of signals in fNIRS must be 2.'
 			raise ValueError(msg)
-			
+
 		self.__data = copy.deepcopy(newData)
 
 		return None
@@ -201,18 +224,18 @@ class fNIRSSignalGenerator:
 	def nChannels(self): #nChannels getter
 		'''
 		Number of channels.
-		
+
 		When setting the number of channels:
-		
-		* if the number of channels is smaller than 
+
+		* if the number of channels is smaller than
 		the current number of channels, a warning is issued
 		and the channels indexed rightmost in the data tensor will be
-		removed. 
-		* if the number of channels is greater than 
+		removed.
+		* if the number of channels is greater than
 		the current number of channels, the new channels will
 		be filled with zeros.
-		
-		
+
+
 		:getter: Gets the number of channels.
 		:setter: Sets the number of channels.
 		:type: int
@@ -231,11 +254,11 @@ class fNIRSSignalGenerator:
 		if newNChannels < 0:
 			msg = self.getClassName() + ':nChannels: Unexpected attribute value. Number of channels must be greater or equal than 0.'
 			raise ValueError(msg)
-		
+
 		if newNChannels > self.nChannels:
 			#Add channels with zeros
 			tmpNChannels = newNChannels-self.nChannels
-			tmpData = np.zeros((self.nSamples,tmpNChannels,1),dtype=float)
+			tmpData = np.zeros((self.nSamples,tmpNChannels,2),dtype=float)
 			self.data = np.concatenate((self.data,tmpData), axis=1)
 		elif newNChannels < self.nChannels:
 			msg = self.getClassName() + ':nChannels: New number of channels is smaller than current number of channels. Some data will be lost.'
@@ -250,17 +273,17 @@ class fNIRSSignalGenerator:
 	def nSamples(self): #nSamples getter
 		'''
 		Number of temporal samples.
-		
+
 		When setting the number of temporal samples:
-		
-		* if the number of temporal samples is smaller than 
+
+		* if the number of temporal samples is smaller than
 		the current number of temporal samples, a warning is issued
-		and the last temporal samples will be removed. 
-		* if the number of temporal samples is greater than 
+		and the last temporal samples will be removed.
+		* if the number of temporal samples is greater than
 		the current number of temporal samples, the new temporal samples will
 		be filled with zeros.
-		
-		
+
+
 		:getter: Gets the number of temporal samples.
 		:setter: Sets the number of temporal samples.
 		:type: int
@@ -279,11 +302,11 @@ class fNIRSSignalGenerator:
 		if newNSamples < 0:
 			msg = self.getClassName() + ':nSamples: Unexpected attribute value. Number of temporal samples must be greater or equal than 0.'
 			raise ValueError(msg)
-		
+
 		if newNSamples > self.nSamples:
 			#Add channels with zeros
 			tmpNSamples = newNSamples-self.nSamples
-			tmpData = np.zeros((tmpNSamples,self.nChannels,1),dtype=float)
+			tmpData = np.zeros((tmpNSamples,self.nChannels,2),dtype=float)
 			self.data = np.concatenate((self.data,tmpData), axis=0)
 		elif newNSamples < self.nSamples:
 			msg = self.getClassName() + ':nSamples: New number of temporal samples is smaller than current number of temporal samples. Some data will be lost.'
@@ -298,7 +321,7 @@ class fNIRSSignalGenerator:
 	def samplingRate(self): #samplingrate getter
 		'''
 		Sampling rate at which the synthetic data will be generated.
-		
+
 		:getter: Gets the sampling rate.
 		:setter: Sets the sampling rate.
 		:type: float
@@ -320,7 +343,7 @@ class fNIRSSignalGenerator:
 			msg = self.getClassName() + ':samplingrate: Unexpected attribute value. ' \
 					+ 'Sampling rate must be strictly positive.'
 			raise ValueError(msg)
-			
+
 		self.__samplingRate = newSamplingRate
 
 		return None
@@ -328,16 +351,16 @@ class fNIRSSignalGenerator:
 
 
 	#Private methods
-	
-	
+
+
 	#Protected methods
-	
+
 
 	#Public methods
 
 	def getClassName(self):
 		'''Gets the class name.
-		
+
 		:return: The class name
 		:rtype: str
 		'''
@@ -751,12 +774,12 @@ class fNIRSSignalGenerator:
 
 		synthData = np.zeros((nSamples, nChannels, 2)) #The synthetic data tensor
 
-		print(HbO2[0:nSamples, :])
-		print(HHb[0:nSamples, :])
+		#print(HbO2[0:nSamples, :])
+		#print(HHb[0:nSamples, :])
 
-		print(enableHHbChannels)
+		#print(enableHHbChannels)
 
-		print(HHb[0:nSamples, :] * enableHHbChannels)
+		#print(HHb[0:nSamples, :] * enableHHbChannels)
 
 		synthData[:, :, self.HBO2] = synthData[:, :, self.HBO2] + HbO2[0:nSamples, :] * enableHbO2Channels
 		synthData[:, :, self.HHB]  = synthData[:, :, self.HHB]  + HHb[0:nSamples, :] * enableHHbChannels
@@ -1126,7 +1149,8 @@ class fNIRSSignalGenerator:
 
 		#An alternative to provide the information for creating the boxCar is by the indication of the onsets and durations.
 		#For this approach, the information is provided as a list of tuples (onset, duration)
-		boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20), (240, 25)]
+		#boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20), (240, 25)]
+		boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20)]
 
 		#The boxCarList_OnsetDurations is used to generate boxCarList, which is a list of tuples (onset, end)
 		#boxCarList is the boxCarList format expected for the methods of class fNIRSSignalGenerator
@@ -1194,6 +1218,8 @@ class fNIRSSignalGenerator:
 		return copy.deepcopy(self.data)
 	#end execute(self)
 
+#class fNIRSSignalGenerator
+
 
 def plotSyntheticfNIRS(tensor, title='', enableHbO2Channels=np.ones(1, dtype=int), enableHHbChannels=np.ones(1, dtype=int)):
 	'''
@@ -1216,7 +1242,43 @@ def plotSyntheticfNIRS(tensor, title='', enableHbO2Channels=np.ones(1, dtype=int
 
 
 def main():
-	sg = fNIRSSignalGenerator(nSamples = 3000, nChannels = 4)
+	# Specifying the channel location map for the EEG signal
+	newId = 2
+	newDescription = 'ChannelLocationMap0002'
+	newNChannels = 4
+	newNOptodes = 4
+	newChLocations = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
+	newOptodesLocations = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
+	newOptodesTypes = np.array([1, 2, 2, 1])  # Remember {0: Unknown, 1: Emission or source, 2: Detector}
+	newReferencePoints = dict({'Nz': np.array([0, -18.5, 0]), 'Iz': np.array([0, 18.5, 0]),
+							   'LPA': np.array([17.5, 0, 0]), 'RPA': np.array([-17.5, 0, 0]),
+							   'Cz': np.array([0, 0, 0])})
+	newSurfacePositioningSystem = 'UI 10/20'
+	newChSurfacePositions = tuple(('Fz', 'C3', 'C4', 'Cz'))
+	newOptodesSurfacePositions = tuple(('FC5', 'CP3', 'FC6', 'CP4'))
+	newChOptodeArrays = np.array([0, 0, 0, 0])
+	newOptodesOptodeArrays = np.array([0, 0, 0, 0])
+	newPairings = np.array([[0, 1], [0, 2], [3, 1], [3, 2]])
+
+	NewChTopoArrangement = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
+	NewOptodesTopoArrangement = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
+
+	oaInfo = optodeArrayInfo(nChannels=newNChannels, nOptodes=newNOptodes, \
+							 mode='HITACHI ETG-4000 2x2 optode array', typeOptodeArray='adult', \
+							 chTopoArrangement=NewChTopoArrangement, \
+							 optodesTopoArrangement=NewOptodesTopoArrangement)
+
+	newOptodeArrays = np.array([oaInfo])
+
+	sg = fNIRSSignalGenerator(nSamples = 3000, id = newId, description = newDescription,
+							  nChannels = newNChannels, nOptodes  = newNOptodes,
+							  chLocations = newChLocations, optodesLocations = newOptodesLocations,
+							  optodesTypes = newOptodesTypes, referencePoints = newReferencePoints,
+							  surfacePositioningSystem = newSurfacePositioningSystem,
+							  chSurfacePositions = newChSurfacePositions,
+							  optodesSurfacePositions = newOptodesSurfacePositions,
+							  chOptodeArrays = newChOptodeArrays, optodesOptodeArrays = newOptodesOptodeArrays,
+							  pairings = newPairings, optodeArrays = newOptodeArrays)
 
 	# testing that constants can not receive other value
 	#print("Valor de HBO2", sg.HBO2) # The value for HBO2 constant is 0
@@ -1227,6 +1289,7 @@ def main():
 	#sg.HHB = 3
 	#print("Nuevo Valor de HHB", sg.HHB)
 
+	sg.showAttributesValues()
 	sg.execute()
 	#print(sg.data)
 #end main()

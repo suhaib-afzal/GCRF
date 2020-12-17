@@ -180,8 +180,8 @@ class optodeArrayInfo:
 		optodesTopoArrangement: A numpy.ndarray of nOptodes x 3, for expressing the
 				topographical arrangement (3D coordinates) of the optodes
 				within the optode array.
-		
-		
+
+
 		:Parameters:
 		
 		:param nChannels: Number of channels supported by the optode array.

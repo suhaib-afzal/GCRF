@@ -1588,14 +1588,14 @@ def main():
 	chLM01.showAttributesValues()
 
 	# A channelLocationMap for EEG and fNIRS signals
-	chLM03 = channelLocationMap(id = newId, description = newDescription, nChannels = newNChannels, nOptodes  = newNOptodes,
+	chLM02 = channelLocationMap(id = newId, description = newDescription, nChannels = newNChannels, nOptodes  = newNOptodes,
 								chLocations = newChLocations, optodesLocations	= newOptodesLocations,
 								optodesTypes = newOptodesTypes, referencePoints = newReferencePoints,
 								surfacePositioningSystem = newSurfacePositioningSystem,
 								chSurfacePositions = newChSurfacePositions, optodesSurfacePositions = newOptodesSurfacePositions,
 								chOptodeArrays = newChOptodeArrays, optodesOptodeArrays = newOptodesOptodeArrays,
 								pairings = newPairings, optodeArrays = newOptodeArrays)
-	chLM03.showAttributesValues()
+	chLM02.showAttributesValues()
 
 #end main()
 
