@@ -14,4 +14,5 @@ Currently, the following projects are being attended:
 ## Dependencies
 
 * Python 3.8 or above
-* The basic scientific libraries; `numpy`, `scipy`, `matplotlib`
+* The basic scientific libraries; `numpy`, `scipy`, `matplotlib`, `pylsl`
+
