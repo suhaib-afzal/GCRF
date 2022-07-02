@@ -1243,8 +1243,8 @@ def plotSyntheticfNIRS(tensor, title='', enableHbO2Channels=np.ones(1, dtype=int
 
 def main():
 	# Specifying the channel location map for the EEG signal
-	newId = 2
-	newDescription = 'ChannelLocationMap0002'
+	newId = 69
+	newDescription = 'ChannelLocationMap666'
 	newNChannels = 5
 	newNOptodes = 4
 	newChLocations = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
