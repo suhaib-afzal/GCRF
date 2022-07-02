@@ -808,9 +808,9 @@ class fNIRSSignalGenerator(channelLocationMap):
 		timestamps = timestamps.reshape(-1, 1) #Reshape to column vector
 		timestamps = np.tile(timestamps,nChannels)
 
-		#noiseHbO2 = np.random.normal(0, 1, timestamps.shape)
-		noiseHbO2 = np.random.normal(0, 0.3, timestamps.shape)
-		noiseHHb  = np.random.normal(0, 0.3, timestamps.shape)
+		noiseHbO2 = np.random.normal(0, 1, timestamps.shape)
+		#noiseHbO2 = np.random.normal(0, 0.3, timestamps.shape)
+		noiseHHb  = np.random.normal(0, 1, timestamps.shape)
 
 		noiseHbO2_plot = np.random.normal(0, 0.3, timestamps.shape)
 
@@ -1076,14 +1076,14 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		channelsList = list(range(0, self.nChannels))
 
-		enableHbO2Channels = np.ones(self.nChannels, dtype=int) # all the channels are enabled for the HbO2 signal
+		enableHbO2Channels = [1 0 1 0] # every other channel enabled to simulate  Oxy vs Deoxy Channels
 		#enableHbO2Channels[1] = 0   # channel 2 is disabled for the HbO2 signal
 		#enableHbO2Channels[2] = 0  # channel 3 is disabled for the HbO2 signal
 
 		#It is possible to express 'enableHbO2Channels' as a list (the program transforms it into an array later)
 		#enableHbO2Channels = [1, 0, 1, 1] # this is for an example of 4 channels
 
-		enableHHbChannels = np.zeros(self.nChannels, dtype=int) # all the channels are disabled for the HHb signal
+		enableHHbChannels = [0 1 0 1] # every other channel enabled to simulate  Oxy vs Deoxy Channels
 		#enableHHbChannels[1] = 0   # channel 2 is disabled for the HHb signal
 		#enableHHbChannels[2] = 0  # channel 3 is disabled for the HHb signal
 
@@ -1117,7 +1117,7 @@ class fNIRSSignalGenerator(channelLocationMap):
 		#It is possible to express 'enableHbO2Blocks' as a list (the program transforms it into an array later)
 		#enableHbO2Blocks = [1, 0, 1, 1] # this is for an example of 4 blocks
 
-		enableHHbBlocks = np.zeros(nBlocks, dtype=int) # all the blocks of the boxCar are disabled for the HHb signal
+		enableHHbBlocks = np.ones(nBlocks, dtype=int) # all the blocks of the boxCar are enabled for the HHb signal
 		#enableHHbBlocks[1] = 0   # block 2 is disabled for the HHb signal in all the channels
 		#enableHHbBlocks[2] = 0  # block 3 is disabled for the HHb signal in all the channels
 
@@ -1155,7 +1155,7 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		self.addGaussianNoise(channelsList, initSample=0, endSample=-1)
 
-		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate, Heart rate, Vasomotion and Gaussian', \
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Gaussian Noise', \
 						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
 		return copy.deepcopy(self.data)
