@@ -1092,8 +1092,8 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		#An alternative to provide the information for creating the boxCar is by the indication of the onsets and durations.
 		#For this approach, the information is provided as a list of tuples (onset, duration)
-		#boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20), (240, 25)]
-		boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20)]
+		boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20), (240, 25)]
+		#boxCarList_OnsetDurations = [(35, 10), (105, 15), (175, 20)]
 
 		#The boxCarList_OnsetDurations is used to generate boxCarList, which is a list of tuples (onset, end)
 		#boxCarList is the boxCarList format expected for the methods of class fNIRSSignalGenerator
@@ -1201,7 +1201,7 @@ def main():
 	newOptodesSurfacePositions = tuple(('FC5', 'CP3', 'FC6', 'CP4'))
 	newChOptodeArrays = np.array([0, 0, 0, 0])
 	newOptodesOptodeArrays = np.array([0, 0, 0, 0])
-	newPairings = np.array([[0, 1]])
+	newPairings = np.array([[0, 1], [0, 2], [3, 1], [3, 2]])
 
 	NewChTopoArrangement = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
 	NewOptodesTopoArrangement = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
