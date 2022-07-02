@@ -1148,7 +1148,7 @@ class fNIRSSignalGenerator(channelLocationMap):
 						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
 		#self.addVasomotionNoise(channelsList, initSample=0, endSample=-1, \
-								   frequencyResolutionStep = 0.01)
+								   #frequencyResolutionStep = 0.01)
 
 		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate, Heart rate, and Vasomotion', \
 						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
