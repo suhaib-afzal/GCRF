@@ -1186,13 +1186,13 @@ def plotSyntheticfNIRS(tensor, title='', enableHbO2Channels=np.ones(1, dtype=int
 
 def main():
 	# Specifying the channel location map for the EEG signal
-	newId = 2
-	newDescription = 'ChannelLocationMap002'
+	newId = 3
+	newDescription = 'First New Config'
 	newNChannels = 4
 	newNOptodes = 4
 	newChLocations = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
 	newOptodesLocations = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
-	newOptodesTypes = np.array([1, 2, 2, 1])  # Remember {0: Unknown, 1: Emission or source, 2: Detector}
+	newOptodesTypes = np.array([1, 2, 1, 2])  # Remember {0: Unknown, 1: Emission or source, 2: Detector}
 	newReferencePoints = dict({'Nz': np.array([0, -18.5, 0]), 'Iz': np.array([0, 18.5, 0]),
 							   'LPA': np.array([17.5, 0, 0]), 'RPA': np.array([-17.5, 0, 0]),
 							   'Cz': np.array([0, 0, 0])})
@@ -1201,7 +1201,7 @@ def main():
 	newOptodesSurfacePositions = tuple(('FC5', 'CP3', 'FC6', 'CP4'))
 	newChOptodeArrays = np.array([0, 0, 0, 0])
 	newOptodesOptodeArrays = np.array([0, 0, 0, 0])
-	newPairings = np.array([[0, 1], [0, 2], [3, 1], [3, 2]])
+	newPairings = np.array([[0, 1]])
 
 	NewChTopoArrangement = np.array([[1, 2, 0], [0, 1, 0], [2, 1, 0], [1, 0, 0]])
 	NewOptodesTopoArrangement = np.array([[0, 2, 0], [2, 2, 0], [0, 0, 0], [2, 0, 0]])
