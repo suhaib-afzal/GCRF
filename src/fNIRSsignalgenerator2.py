@@ -1078,13 +1078,13 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		enableHbO2Channels = np.ones(self.nChannels, dtype=int) # all the channels are enabled for the HbO2 signal
 		#enableHbO2Channels[1] = 0   # channel 2 is disabled for the HbO2 signal
-		enableHbO2Channels[2] = 0  # channel 3 is disabled for the HbO2 signal
+		#enableHbO2Channels[2] = 0  # channel 3 is disabled for the HbO2 signal
 
 		#It is possible to express 'enableHbO2Channels' as a list (the program transforms it into an array later)
 		#enableHbO2Channels = [1, 0, 1, 1] # this is for an example of 4 channels
 
-		enableHHbChannels = np.ones(self.nChannels, dtype=int) # all the channels are enabled for the HHb signal
-		enableHHbChannels[1] = 0   # channel 2 is disabled for the HHb signal
+		enableHHbChannels = np.zeros(self.nChannels, dtype=int) # all the channels are disabled for the HHb signal
+		#enableHHbChannels[1] = 0   # channel 2 is disabled for the HHb signal
 		#enableHHbChannels[2] = 0  # channel 3 is disabled for the HHb signal
 
 		#It is possible to express 'enableHHbChannels' as a list (the program transforms it into an array later)
@@ -1111,15 +1111,15 @@ class fNIRSSignalGenerator(channelLocationMap):
 		nBlocks = len(boxCarListSet)
 
 		enableHbO2Blocks = np.ones(nBlocks, dtype=int) # all the blocks of the boxCar are enabled for the HbO2 signal
-		enableHbO2Blocks[1] = 0   # block 2 is disabled for the HbO2 signal in all the channels
+		#enableHbO2Blocks[1] = 0   # block 2 is disabled for the HbO2 signal in all the channels
 		#enableHbO2Blocks[2] = 0  # block 3 is disabled for the HbO2 signal in all the channels
 
 		#It is possible to express 'enableHbO2Blocks' as a list (the program transforms it into an array later)
 		#enableHbO2Blocks = [1, 0, 1, 1] # this is for an example of 4 blocks
 
-		enableHHbBlocks = np.ones(nBlocks, dtype=int) # all the blocks of the boxCar are enabled for the HHb signal
+		enableHHbBlocks = np.zeros(nBlocks, dtype=int) # all the blocks of the boxCar are disabled for the HHb signal
 		#enableHHbBlocks[1] = 0   # block 2 is disabled for the HHb signal in all the channels
-		enableHHbBlocks[2] = 0  # block 3 is disabled for the HHb signal in all the channels
+		#enableHHbBlocks[2] = 0  # block 3 is disabled for the HHb signal in all the channels
 
 		#It is possible to express 'enableHHbBlocks' as a list (the program transforms it into an array later)
 		#enableHHbBlocks = [1, 0, 1, 1] # this is for an example of 4 blocks
@@ -1133,25 +1133,25 @@ class fNIRSSignalGenerator(channelLocationMap):
 							   enableHbO2Blocks=enableHbO2Blocks,
 							   enableHHbBlocks=enableHHbBlocks)
 
-		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS', enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS', enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
-		self.addBreathingRateNoise(channelsList, initSample=0, endSample=-1, \
+		#self.addBreathingRateNoise(channelsList, initSample=0, endSample=-1, \
+								   #frequencyResolutionStep = 0.01)
+
+		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Breathing rate noise', \
+						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+
+		#self.addHeartRateNoise(channelsList, initSample=0, endSample=-1, \
+								   #frequencyResolutionStep = 0.01)
+
+		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate and Heart rate', \
+						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+
+		#self.addVasomotionNoise(channelsList, initSample=0, endSample=-1, \
 								   frequencyResolutionStep = 0.01)
 
-		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Breathing rate noise', \
-						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
-
-		self.addHeartRateNoise(channelsList, initSample=0, endSample=-1, \
-								   frequencyResolutionStep = 0.01)
-
-		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate and Heart rate', \
-						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
-
-		self.addVasomotionNoise(channelsList, initSample=0, endSample=-1, \
-								   frequencyResolutionStep = 0.01)
-
-		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate, Heart rate, and Vasomotion', \
-						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Noises: Breathing rate, Heart rate, and Vasomotion', \
+						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
 		self.addGaussianNoise(channelsList, initSample=0, endSample=-1)
 
