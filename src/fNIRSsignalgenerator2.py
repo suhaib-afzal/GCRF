@@ -1076,14 +1076,14 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		channelsList = list(range(0, self.nChannels))
 
-		enableHbO2Channels = [1 0 1 0] # every other channel enabled to simulate  Oxy vs Deoxy Channels
+		enableHbO2Channels = [1, 0, 1, 0] # every other channel enabled to simulate  Oxy vs Deoxy Channels
 		#enableHbO2Channels[1] = 0   # channel 2 is disabled for the HbO2 signal
 		#enableHbO2Channels[2] = 0  # channel 3 is disabled for the HbO2 signal
 
 		#It is possible to express 'enableHbO2Channels' as a list (the program transforms it into an array later)
 		#enableHbO2Channels = [1, 0, 1, 1] # this is for an example of 4 channels
 
-		enableHHbChannels = [0 1 0 1] # every other channel enabled to simulate  Oxy vs Deoxy Channels
+		enableHHbChannels = [0, 1, 0, 1] # every other channel enabled to simulate  Oxy vs Deoxy Channels
 		#enableHHbChannels[1] = 0   # channel 2 is disabled for the HHb signal
 		#enableHHbChannels[2] = 0  # channel 3 is disabled for the HHb signal
 
