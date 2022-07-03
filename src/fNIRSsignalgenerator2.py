@@ -689,43 +689,43 @@ class fNIRSSignalGenerator(channelLocationMap):
 				boxCarHHb[i:j] = 1
 			iBlock+=1
 
-		plt.plot(boxCar, color='black')
-		plt.title('BoxCar')
-		plt.show()
+		#plt.plot(boxCar, color='black')
+		#plt.title('BoxCar')
+		#plt.show()
 
-		plt.plot(boxCarHbO2, color='red')
-		plt.title('BoxCar with the enabled blocks for HbO2 signal')
-		plt.show()
+		#plt.plot(boxCarHbO2, color='red')
+		#plt.title('BoxCar with the enabled blocks for HbO2 signal')
+		#plt.show()
 
-		plt.plot(boxCarHHb, color='blue')
-		plt.title('BoxCar with the enabled blocks for HHb signal')
-		plt.show()
+		#plt.plot(boxCarHHb, color='blue')
+		#plt.title('BoxCar with the enabled blocks for HHb signal')
+		#plt.show()
 
 		HRF = self.double_gamma_function(timestamps, tau_p, tau_d, amplitudeScalingFactor)
 
 		# This is only for visualizing the doble gamma function
 		timestamps1 = np.arange(0, 25, 0.1, dtype=float)
 		HRF1 = self.double_gamma_function(timestamps1, tau_p, tau_d, amplitudeScalingFactor)
-		plt.plot(HRF1, color='green')
-		plt.title('Double gamma function')
-		plt.xlabel('Time [samples]')
-		plt.ylabel('HRF')
-		plt.show()
+		#plt.plot(HRF1, color='green')
+		#plt.title('Double gamma function')
+		#plt.xlabel('Time [samples]')
+		#plt.ylabel('HRF')
+		#plt.show()
 
 		HbO2 = np.convolve(boxCarHbO2, HRF)
 
-		plt.plot(HbO2, color='red')
-		plt.title('Result of the convolution of HRF and the BoxCar for HbO2 signal')
-		plt.show()
+		#plt.plot(HbO2, color='red')
+		#plt.title('Result of the convolution of HRF and the BoxCar for HbO2 signal')
+		#plt.show()
 
 		HbO2 = HbO2.reshape(-1, 1) #Reshape to column vector
 		HbO2 = np.tile(HbO2, nChannels)
 
 		HbO2forHHb = np.convolve(boxCarHHb, HRF)
 
-		plt.plot(HbO2forHHb, color='blue')
-		plt.title('Result of the convolution of HRF and the BoxCar for HHb signal')
-		plt.show()
+		#plt.plot(HbO2forHHb, color='blue')
+		#plt.title('Result of the convolution of HRF and the BoxCar for HHb signal')
+		#plt.show()
 
 		HbO2forHHb = HbO2forHHb.reshape(-1, 1) #Reshape to column vector
 		HbO2forHHb = np.tile(HbO2forHHb, nChannels)
@@ -1155,8 +1155,8 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		self.addGaussianNoise(channelsList, initSample=0, endSample=-1)
 
-		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Gaussian Noise', \
-						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Gaussian Noise', \
+						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 
 		return copy.deepcopy(self.data)
 	#end execute(self)
