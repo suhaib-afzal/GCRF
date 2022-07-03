@@ -1158,6 +1158,7 @@ class fNIRSSignalGenerator(channelLocationMap):
 		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Gaussian Noise', \
 						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
 		print(copy.deepcopy(self.data))
+		np.size(copy.deepcopy(self.data))
 
 		return copy.deepcopy(self.data)
 	#end execute(self)
