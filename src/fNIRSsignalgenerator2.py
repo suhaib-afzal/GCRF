@@ -814,9 +814,9 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		noiseHbO2_plot = np.random.normal(0, 0.3, timestamps.shape)
 
-		plt.plot(noiseHbO2_plot[0:nSamples,0], color='blue')
-		plt.title('Gaussian Noise')
-		plt.show()
+		#plt.plot(noiseHbO2_plot[0:nSamples,0], color='blue')
+		#plt.title('Gaussian Noise')
+		#plt.show()
 
 		#plt.plot(noiseHHb[0:nSamples,0], color='blue')
 		#plt.show()
@@ -1155,8 +1155,9 @@ class fNIRSSignalGenerator(channelLocationMap):
 
 		self.addGaussianNoise(channelsList, initSample=0, endSample=-1)
 
-		#plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Gaussian Noise', \
-						   #enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+		plotSyntheticfNIRS(self.data, title='Synthetic fNIRS + Gaussian Noise', \
+						   enableHbO2Channels=enableHbO2Channels, enableHHbChannels=enableHHbChannels)
+		print(copy.deepcopy(self.data))
 
 		return copy.deepcopy(self.data)
 	#end execute(self)
@@ -1240,7 +1241,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
-	
-print(data)
