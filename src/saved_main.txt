@@ -1,0 +1,21 @@
+
+def main(boxcar_amp = [1], channel_amp=[1]):
+	# Specifying the channel location map for the EEG signal
+	newNChannels = 10
+	newChLocations = np.array([[np.NaN, np.NaN, np.NaN],[np.NaN, np.NaN, np.NaN],[np.NaN, np.NaN, np.NaN],[np.NaN, np.NaN, np.NaN],\
+					[np.NaN, np.NaN, np.NaN], [np.NaN, np.NaN, np.NaN], [np.NaN, np.NaN, np.NaN], [np.NaN, np.NaN, np.NaN],\
+					[np.NaN, np.NaN, np.NaN],[np.NaN, np.NaN, np.NaN]])
+	
+	sg = fNIRSSignalGenerator(nSamples=3000, nChannels=newNChannels, chLocations = newChLocations)
+
+
+
+	print("Valor de HHB", sg.HHB) # The value for HHB constant is 1
+	sg.HHB = 3
+	print("Nuevo Valor de HHB", sg.HHB)
+
+	#sg.showAttributesValues()
+	sg.execute(boxcar_amp = boxcar_amp, channel_amp=channel_amp)
+	#print(sg.data)
+	return sg.data
+#end main()
